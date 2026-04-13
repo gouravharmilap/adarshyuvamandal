@@ -355,7 +355,8 @@
         </div>
     </div>
 
-    <script src="data.js?v=4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="data.js?v=5"></script>
     <script>
         // Debug: check if data.js loaded
         console.log('data.js loaded, getUpdates exists:', typeof getUpdates === 'function');
@@ -373,97 +374,101 @@
             }
         }
 
-        // Initialize data
-        if (typeof initializeData === 'function') {
-            initializeData();
+        // Wait for data to load, then render
+        async function initPage() {
+            // Initialize and wait for data
+            if (typeof initializeData === 'function') {
+                await initializeData();
+            }
+
+            // Small delay to ensure cache is populated
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Load gallery
+            (function() {
+                var gallery = [];
+                if (typeof getGallery === 'function') {
+                    gallery = getGallery();
+                }
+                var container = document.getElementById('galleryContainer');
+                if (container) {
+                    if (gallery.length === 0) {
+                        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No gallery items yet.</p>';
+                    } else {
+                        var html = '';
+                        for (var i = 0; i < gallery.length; i++) {
+                            var item = gallery[i];
+                            html += '<div class="gallery-item fade-in">' +
+                                '<img src="' + item.src + '" alt="' + item.title + '" onerror="this.src=\'https://via.placeholder.com/400x300/1a1a2e/d4af37?text=Image+Not+Found\'">' +
+                                '<div class="gallery-overlay">' +
+                                '<h3>' + item.title + '</h3>' +
+                                '<p>' + item.description + '</p>' +
+                                '</div></div>';
+                        }
+                        container.innerHTML = html;
+                    }
+                }
+            })();
+
+            // Load memories
+            (function() {
+                var memories = [];
+                if (typeof getMemories === 'function') {
+                    memories = getMemories();
+                }
+                var container = document.getElementById('memoriesContainer');
+                if (container) {
+                    if (memories.length === 0) {
+                        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No memories yet.</p>';
+                    } else {
+                        var html = '';
+                        for (var i = 0; i < memories.length; i++) {
+                            var m = memories[i];
+                            html += '<div class="memory-item fade-in">' +
+                                '<div class="memory-image">' +
+                                '<img src="' + m.src + '" alt="' + m.title + '" onerror="this.src=\'https://via.placeholder.com/400x250/1a1a2e/d4af37?text=Image+Not+Found\'">' +
+                                '<span class="memory-date">' + m.date + '</span>' +
+                                '</div>' +
+                                '<div class="memory-content">' +
+                                '<h3>' + m.title + '</h3>' +
+                                '<p>' + m.description + '</p>' +
+                                '</div></div>';
+                        }
+                        container.innerHTML = html;
+                    }
+                }
+            })();
+
+            // Load notification
+            (function() {
+                var notificationBox = document.getElementById('notificationBox');
+                var notificationContent = document.getElementById('notificationContent');
+
+                if (!notificationBox || !notificationContent) {
+                    return;
+                }
+
+                var updates = [];
+                if (typeof getUpdates === 'function') {
+                    updates = getUpdates();
+                }
+
+                var latestUpdate = null;
+                if (updates && updates.length > 0) {
+                    latestUpdate = updates[0];
+                }
+
+                if (!latestUpdate) {
+                    latestUpdate = { text: "Vishal Jagaran 2026 registrations now open!", date: "2026-04-10" };
+                }
+
+                notificationContent.innerHTML = '<div style="margin-bottom: 10px; color: #f4e4bc; font-weight: 500;">' + latestUpdate.text + '</div><div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; gap: 5px;"><i class="fas fa-calendar-alt"></i> ' + latestUpdate.date + '</div>';
+                notificationBox.style.display = 'block';
+            })();
         }
 
-        // Load gallery
-        (function() {
-            var gallery = [];
-            if (typeof getGallery === 'function') {
-                gallery = getGallery();
-            }
-            var container = document.getElementById('galleryContainer');
-            if (container) {
-                if (gallery.length === 0) {
-                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No gallery items yet.</p>';
-                } else {
-                    var html = '';
-                    for (var i = 0; i < gallery.length; i++) {
-                        var item = gallery[i];
-                        html += '<div class="gallery-item fade-in">' +
-                            '<img src="' + item.src + '" alt="' + item.title + '" onerror="this.src=\'https://via.placeholder.com/400x300/1a1a2e/d4af37?text=Image+Not+Found\'">' +
-                            '<div class="gallery-overlay">' +
-                            '<h3>' + item.title + '</h3>' +
-                            '<p>' + item.description + '</p>' +
-                            '</div></div>';
-                    }
-                    container.innerHTML = html;
-                }
-            }
-        })();
-
-        // Load memories
-        (function() {
-            var memories = [];
-            if (typeof getMemories === 'function') {
-                memories = getMemories();
-            }
-            var container = document.getElementById('memoriesContainer');
-            if (container) {
-                if (memories.length === 0) {
-                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No memories yet.</p>';
-                } else {
-                    var html = '';
-                    for (var i = 0; i < memories.length; i++) {
-                        var m = memories[i];
-                        html += '<div class="memory-item fade-in">' +
-                            '<div class="memory-image">' +
-                            '<img src="' + m.src + '" alt="' + m.title + '" onerror="this.src=\'https://via.placeholder.com/400x250/1a1a2e/d4af37?text=Image+Not+Found\'">' +
-                            '<span class="memory-date">' + m.date + '</span>' +
-                            '</div>' +
-                            '<div class="memory-content">' +
-                            '<h3>' + m.title + '</h3>' +
-                            '<p>' + m.description + '</p>' +
-                            '</div></div>';
-                    }
-                    container.innerHTML = html;
-                }
-            }
-        })();
-
-        // Load notification
-        (function() {
-            var notificationBox = document.getElementById('notificationBox');
-            var notificationContent = document.getElementById('notificationContent');
-
-            console.log('notificationBox:', notificationBox, 'notificationContent:', notificationContent);
-
-            if (!notificationBox || !notificationContent) {
-                console.log('Notification elements not found');
-                return;
-            }
-
-            var updates = [];
-            if (typeof getUpdates === 'function') {
-                updates = getUpdates();
-            }
-            console.log('Updates:', updates);
-
-            var latestUpdate = null;
-            if (updates && updates.length > 0) {
-                latestUpdate = updates[0];
-            }
-
-            if (!latestUpdate) {
-                latestUpdate = { text: "Vishal Jagaran 2026 registrations now open!", date: "2026-04-10" };
-            }
-
-            console.log('Setting notification:', latestUpdate);
-            notificationContent.innerHTML = '<div style="margin-bottom: 10px; color: #f4e4bc; font-weight: 500;">' + latestUpdate.text + '</div><div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; gap: 5px;"><i class="fas fa-calendar-alt"></i> ' + latestUpdate.date + '</div>';
-            notificationBox.style.display = 'block';
-        })();
+        // Start page initialization
+        initPage();
 
         function closeNotification() {
             document.getElementById('notificationBox').style.display = 'none';
