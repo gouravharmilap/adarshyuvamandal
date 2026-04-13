@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npx antigravity-awesome-skills:*)",
+      "Bash(rm -rf .git)",
+      "Bash(rm -f package.json server.js .env.example)"
+    ]
+  }
+}
