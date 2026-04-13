@@ -582,20 +582,39 @@
     <script>
         let currentEditType = null;
         let currentEditId = null;
+        let dataReady = false;
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // Wait for data to load before enabling login
+        async function initAdmin() {
+            if (typeof initializeData === 'function') {
+                await initializeData();
+            }
+            // Wait for cache to be populated
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            dataReady = true;
+
             if (isLoggedIn()) {
                 showAdminPanel();
             }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initAdmin();
         });
 
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!dataReady) {
+                document.getElementById('loginError').textContent = 'Please wait, loading data...';
+                document.getElementById('loginError').style.display = 'block';
+                return;
+            }
             const password = document.getElementById('passwordInput').value;
             if (verifyAdminPassword(password)) {
                 setLoggedIn(true);
                 showAdminPanel();
             } else {
+                document.getElementById('loginError').textContent = 'Invalid password. Try again.';
                 document.getElementById('loginError').style.display = 'block';
             }
         });

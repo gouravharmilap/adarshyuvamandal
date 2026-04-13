@@ -5,7 +5,9 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(npx antigravity-awesome-skills:*)",
       "Bash(rm -rf .git)",
-      "Bash(rm -f package.json server.js .env.example)"
+      "Bash(rm -f package.json server.js .env.example)",
+      "Bash(git config:*)",
+      "Bash(gh auth:*)"
     ]
   }
 }
