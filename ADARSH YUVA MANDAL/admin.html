@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - आदर्श युवा मंडल</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { padding-top: 80px; }
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto 50px;
+            padding: 20px;
+        }
+        .login-box {
+            max-width: 450px;
+            margin: 50px auto;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 55px;
+            text-align: center;
+        }
+        .login-box h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent);
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 25px 35px;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .admin-header h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent);
+            font-size: 1.8rem;
+        }
+        .logout-btn {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+            padding: 10px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .logout-btn:hover {
+            background: #ff6b6b;
+            color: var(--dark);
+        }
+        .view-site-btn {
+            background: rgba(78, 205, 196, 0.2);
+            color: #4ecdc4;
+            border: 1px solid #4ecdc4;
+            padding: 10px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .view-site-btn:hover {
+            background: #4ecdc4;
+            color: var(--dark);
+        }
+        .admin-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .admin-tab {
+            padding: 12px 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            color: var(--text-light);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .admin-tab:hover, .admin-tab.active {
+            background: var(--accent);
+            color: var(--dark);
+            border-color: var(--accent);
+        }
+        .admin-section {
+            display: none;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 40px;
+        }
+        .admin-section.active {
+            display: block;
+        }
+        .admin-section h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+        .admin-section > p {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .item-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+        }
+        .item-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.3);
+        }
+        .item-card h4 {
+            color: var(--accent-light);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        .item-card p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        .item-card .date-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--gold-gradient);
+            color: var(--dark);
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .item-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .item-actions button {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            border: none;
+        }
+        .edit-btn {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--accent);
+            border: 1px solid var(--accent) !important;
+        }
+        .edit-btn:hover {
+            background: var(--accent);
+            color: var(--dark);
+        }
+        .delete-btn {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b !important;
+        }
+        .delete-btn:hover {
+            background: #ff6b6b;
+            color: var(--dark);
+        }
+        .toggle-btn {
+            background: rgba(78, 205, 196, 0.2);
+            color: #4ecdc4;
+            border: 1px solid #4ecdc4 !important;
+        }
+        .toggle-btn:hover, .toggle-btn.active {
+            background: #4ecdc4;
+            color: var(--dark);
+        }
+        .add-form {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+        .add-form h3 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        .form-row input, .form-row textarea, .form-row select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+        .form-row input:focus, .form-row textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .form-row label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--accent-light);
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+        .submit-btn {
+            background: var(--gold-gradient);
+            color: var(--dark);
+            padding: 12px 30px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+        .update-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        .update-item .update-text {
+            flex: 1;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+        .update-item .update-date {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 0 15px;
+        }
+        .update-item .update-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .thought-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        .thought-item .thought-text {
+            flex: 1;
+            font-style: italic;
+            color: var(--accent-light);
+        }
+        .thought-item .thought-date {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 0 15px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 14px 25px;
+            background: var(--accent);
+            color: var(--dark);
+            border-radius: 12px;
+            font-weight: 600;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .change-password-section {
+            max-width: 400px;
+            margin-top: 20px;
+        }
+        .btn-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .admin-tabs {
+                justify-content: center;
+            }
+            .admin-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .btn-row {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">
+            <img src="logo.jpg" alt="Adarsh Yuva Mandal Logo">
+            <span>आदर्श युवा मंडल</span>
+        </a>
+    </nav>
+
+    <!-- Login Form -->
+    <div class="login-box" id="loginBox">
+        <h2><i class="fas fa-lock"></i> Admin Login</h2>
+        <form id="loginForm">
+            <input type="password" id="passwordInput" placeholder="Enter Admin Password" required>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+        <p style="color: var(--text-muted); margin-top: 20px; font-size: 0.85rem;">
+            Default password: aym2026admin
+        </p>
+        <div id="loginError" style="color: #ff6b6b; margin-top: 15px; display: none;">
+            <i class="fas fa-exclamation-circle"></i> Invalid password. Try again.
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-container hidden" id="adminPanel">
+        <div class="admin-header">
+            <h1><i class="fas fa-cog"></i> Admin Panel</h1>
+            <div class="btn-row">
+                <a href="index.html" target="_blank" class="view-site-btn">
+                    <i class="fas fa-external-link-alt"></i> View Site
+                </a>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="showSection('updates')">
+                <i class="fas fa-bullhorn"></i> Live Updates
+            </button>
+            <button class="admin-tab" onclick="showSection('gallery')">
+                <i class="fas fa-images"></i> Gallery
+            </button>
+            <button class="admin-tab" onclick="showSection('memories')">
+                <i class="fas fa-camera"></i> Memories
+            </button>
+            <button class="admin-tab" onclick="showSection('thoughts')">
+                <i class="fas fa-comment"></i> Thoughts
+            </button>
+            <button class="admin-tab" onclick="showSection('settings')">
+                <i class="fas fa-key"></i> Settings
+            </button>
+        </div>
+
+        <!-- Live Updates Section -->
+        <div class="admin-section active" id="updates-section">
+            <h2><i class="fas fa-bullhorn"></i> Live Updates Manager</h2>
+            <p>Updates appear as a notification box on the website. Toggle to show/hide without deleting.</p>
+            <div class="add-form">
+                <h3><i class="fas fa-plus"></i> Add New Update</h3>
+                <div class="form-row">
+                    <div>
+                        <label>Update Message</label>
+                        <input type="text" id="updateText" placeholder="e.g., 🎉 Meeting tomorrow at 6 PM">
+                    </div>
+                    <div>
+                        <label>Date</label>
+                        <input type="date" id="updateDate">
+                    </div>
+                </div>
+                <button class="submit-btn" onclick="adminAddUpdate()">
+                    <i class="fas fa-plus"></i> Add Update
+                </button>
+            </div>
+            <div id="updatesList" style="margin-top: 30px;"></div>
+        </div>
+
+        <!-- Gallery Section -->
+        <div class="admin-section" id="gallery-section">
+            <h2><i class="fas fa-images"></i> Gallery Manager</h2>
+            <p>Add, edit, or remove gallery images displayed on the website.</p>
+            <div class="item-grid" id="galleryGrid"></div>
+            <div class="add-form">
+                <h3><i class="fas fa-plus"></i> Add New Gallery Item</h3>
+                <div class="form-row full">
+                    <div>
+                        <label>Image URL or Local Path (e.g., logo.jpg)</label>
+                        <input type="text" id="gallerySrc" placeholder="logo.jpg or https://example.com/image.jpg">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <label>Title</label>
+                        <input type="text" id="galleryTitle" placeholder="Image title">
+                    </div>
+                    <div>
+                        <label>Description</label>
+                        <input type="text" id="galleryDesc" placeholder="Brief description">
+                    </div>
+                </div>
+                <button class="submit-btn" onclick="adminAddGalleryItem()">
+                    <i class="fas fa-plus"></i> Add to Gallery
+                </button>
+            </div>
+        </div>
+
+        <!-- Memories Section -->
+        <div class="admin-section" id="memories-section">
+            <h2><i class="fas fa-camera"></i> Memories Manager</h2>
+            <p>Manage memory entries shown in the Memories section of the website.</p>
+            <div class="item-grid" id="memoriesGrid"></div>
+            <div class="add-form">
+                <h3><i class="fas fa-plus"></i> Add New Memory</h3>
+                <div class="form-row full">
+                    <div>
+                        <label>Image URL or Local Path</label>
+                        <input type="text" id="memorySrc" placeholder="memories.jpg or https://example.com/image.jpg">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <label>Title</label>
+                        <input type="text" id="memoryTitle" placeholder="Memory title">
+                    </div>
+                    <div>
+                        <label>Year/Date</label>
+                        <input type="text" id="memoryDate" placeholder="e.g., 2024">
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div>
+                        <label>Description</label>
+                        <textarea id="memoryDesc" placeholder="Describe this memory..." style="width:100%;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:10px;color:var(--text-light);font-size:0.9rem;box-sizing:border-box;min-height:80px;"></textarea>
+                    </div>
+                </div>
+                <button class="submit-btn" onclick="adminAddMemory()">
+                    <i class="fas fa-plus"></i> Add Memory
+                </button>
+            </div>
+        </div>
+
+        <!-- Thoughts Section -->
+        <div class="admin-section" id="thoughts-section">
+            <h2><i class="fas fa-comment"></i> Thoughts & History</h2>
+            <p>Manage inspirational thoughts and messages displayed on the website.</p>
+            <div class="add-form">
+                <h3><i class="fas fa-plus"></i> Add New Thought</h3>
+                <div class="form-row full">
+                    <div>
+                        <label>Thought / Message</label>
+                        <input type="text" id="thoughtText" placeholder="Enter thought or inspirational message...">
+                    </div>
+                </div>
+                <button class="submit-btn" onclick="adminAddThought()">
+                    <i class="fas fa-plus"></i> Add Thought
+                </button>
+            </div>
+            <div id="thoughtsList" style="margin-top: 30px;"></div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="admin-section" id="settings-section">
+            <h2><i class="fas fa-key"></i> Change Password</h2>
+            <p>Change your admin password to keep your panel secure.</p>
+            <div class="change-password-section">
+                <div class="form-row full">
+                    <div>
+                        <label>Current Password</label>
+                        <input type="password" id="currentPassword" placeholder="Enter current password">
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div>
+                        <label>New Password</label>
+                        <input type="password" id="newPassword" placeholder="Enter new password">
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div>
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                    </div>
+                </div>
+                <button class="submit-btn" onclick="changePassword()">
+                    <i class="fas fa-save"></i> Update Password
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: var(--dark-surface); border: 1px solid var(--glass-border); border-radius: 25px; padding: 35px; max-width: 500px; width: 100%;">
+            <h3 style="color: var(--accent); margin-bottom: 25px; font-family: 'Playfair Display', serif;" id="modalTitle">Edit Item</h3>
+            <div id="modalContent"></div>
+            <div style="display: flex; gap: 12px; margin-top: 25px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveModal()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js?v=3"></script>
+    <script>
+        let currentEditType = null;
+        let currentEditId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (isLoggedIn()) {
+                showAdminPanel();
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('passwordInput').value;
+            if (verifyAdminPassword(password)) {
+                setLoggedIn(true);
+                showAdminPanel();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        function showAdminPanel() {
+            document.getElementById('loginBox').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            loadAllSections();
+        }
+
+        function logout() {
+            setLoggedIn(false);
+            document.getElementById('loginBox').classList.remove('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        function showSection(sectionName) {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(sectionName + '-section').classList.add('active');
+            event.target.closest('.admin-tab').classList.add('active');
+        }
+
+        function loadAllSections() {
+            loadUpdates();
+            loadGallery();
+            loadMemories();
+            loadThoughts();
+        }
+
+        // ===== UPDATES =====
+        function loadUpdates() {
+            const updates = getAllUpdates();
+            const container = document.getElementById('updatesList');
+            if (updates.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No updates yet. Add your first update above.</p>';
+                return;
+            }
+            container.innerHTML = updates.map(u => `
+                <div class="update-item">
+                    <span class="update-text">${u.text}</span>
+                    <span class="update-date">${u.date}</span>
+                    <div class="update-actions">
+                        <button class="toggle-btn ${u.active ? 'active' : ''}" onclick="adminToggleUpdate(${u.id})" title="${u.active ? 'Hide' : 'Show'}">
+                            <i class="fas fa-${u.active ? 'eye' : 'eye-slash'}"></i>
+                        </button>
+                        <button class="delete-btn" onclick="adminDeleteUpdate(${u.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function adminAddUpdate() {
+            const text = document.getElementById('updateText').value.trim();
+            const date = document.getElementById('updateDate').value;
+            if (!text) {
+                showToast('Please enter update text');
+                return;
+            }
+            createUpdate(text);
+            if (date) {
+                const data = getData();
+                data.updates[0].date = date;
+                saveData(data);
+            }
+            document.getElementById('updateText').value = '';
+            document.getElementById('updateDate').value = '';
+            loadUpdates();
+            showToast('Update added!');
+        }
+
+        function adminToggleUpdate(id) {
+            toggleUpdateStatus(id);
+            loadUpdates();
+        }
+
+        function adminDeleteUpdate(id) {
+            if (confirm('Delete this update?')) {
+                removeUpdate(id);
+                loadUpdates();
+                showToast('Update deleted');
+            }
+        }
+
+        // ===== GALLERY =====
+        function loadGallery() {
+            const gallery = getGallery();
+            const container = document.getElementById('galleryGrid');
+            if (gallery.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No gallery items yet. Add your first image above.</p>';
+                return;
+            }
+            container.innerHTML = gallery.map(item => `
+                <div class="item-card">
+                    <img src="${item.src}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/300x160/1a1a2e/d4af37?text=Image+Not+Found'">
+                    <h4>${item.title}</h4>
+                    <p>${item.description}</p>
+                    <div class="item-actions">
+                        <button class="edit-btn" onclick="adminEditGallery(${item.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="delete-btn" onclick="adminDeleteGallery(${item.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function adminAddGalleryItem() {
+            const src = document.getElementById('gallerySrc').value.trim();
+            const title = document.getElementById('galleryTitle').value.trim();
+            const desc = document.getElementById('galleryDesc').value.trim();
+            if (!src || !title) {
+                showToast('Please fill in image path and title');
+                return;
+            }
+            createGalleryItem(src, title, desc);
+            document.getElementById('gallerySrc').value = '';
+            document.getElementById('galleryTitle').value = '';
+            document.getElementById('galleryDesc').value = '';
+            loadGallery();
+            showToast('Gallery item added!');
+        }
+
+        function adminEditGallery(id) {
+            currentEditType = 'gallery';
+            currentEditId = id;
+            const data = getData();
+            const item = data.gallery.find(i => i.id === id);
+            document.getElementById('modalTitle').textContent = 'Edit Gallery Item';
+            document.getElementById('modalContent').innerHTML = `
+                <div class="form-row full">
+                    <div><label>Image URL / Path</label><input type="text" id="editSrc" value="${item.src}"></div>
+                </div>
+                <div class="form-row">
+                    <div><label>Title</label><input type="text" id="editTitle" value="${item.title}"></div>
+                    <div><label>Description</label><input type="text" id="editDesc" value="${item.description}"></div>
+                </div>
+            `;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function adminDeleteGallery(id) {
+            if (confirm('Delete this gallery item?')) {
+                removeGalleryItem(id);
+                loadGallery();
+                showToast('Gallery item deleted');
+            }
+        }
+
+        // ===== MEMORIES =====
+        function loadMemories() {
+            const memories = getMemories();
+            const container = document.getElementById('memoriesGrid');
+            if (memories.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No memories yet. Add your first memory above.</p>';
+                return;
+            }
+            container.innerHTML = memories.map(m => `
+                <div class="item-card">
+                    <span class="date-badge">${m.date}</span>
+                    <img src="${m.src}" alt="${m.title}" onerror="this.src='https://via.placeholder.com/300x160/1a1a2e/d4af37?text=Image+Not+Found'">
+                    <h4>${m.title}</h4>
+                    <p>${m.description}</p>
+                    <div class="item-actions">
+                        <button class="edit-btn" onclick="adminEditMemory(${m.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="delete-btn" onclick="adminDeleteMemory(${m.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function adminAddMemory() {
+            const src = document.getElementById('memorySrc').value.trim();
+            const title = document.getElementById('memoryTitle').value.trim();
+            const date = document.getElementById('memoryDate').value.trim();
+            const desc = document.getElementById('memoryDesc').value.trim();
+            if (!src || !title) {
+                showToast('Please fill in image path and title');
+                return;
+            }
+            createMemory(src, title, desc, date);
+            document.getElementById('memorySrc').value = '';
+            document.getElementById('memoryTitle').value = '';
+            document.getElementById('memoryDate').value = '';
+            document.getElementById('memoryDesc').value = '';
+            loadMemories();
+            showToast('Memory added!');
+        }
+
+        function adminEditMemory(id) {
+            currentEditType = 'memory';
+            currentEditId = id;
+            const data = getData();
+            const item = data.memories.find(m => m.id === id);
+            document.getElementById('modalTitle').textContent = 'Edit Memory';
+            document.getElementById('modalContent').innerHTML = `
+                <div class="form-row full">
+                    <div><label>Image URL / Path</label><input type="text" id="editSrc" value="${item.src}"></div>
+                </div>
+                <div class="form-row">
+                    <div><label>Title</label><input type="text" id="editTitle" value="${item.title}"></div>
+                    <div><label>Year</label><input type="text" id="editDate" value="${item.date}"></div>
+                </div>
+                <div class="form-row full">
+                    <div><label>Description</label><textarea id="editDesc" style="width:100%;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:10px;color:var(--text-light);font-size:0.9rem;box-sizing:border-box;min-height:80px;">${item.description}</textarea></div>
+                </div>
+            `;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function adminDeleteMemory(id) {
+            if (confirm('Delete this memory?')) {
+                removeMemory(id);
+                loadMemories();
+                showToast('Memory deleted');
+            }
+        }
+
+        // ===== THOUGHTS =====
+        function loadThoughts() {
+            const thoughts = getThoughts();
+            const container = document.getElementById('thoughtsList');
+            if (thoughts.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No thoughts yet. Add your first thought above.</p>';
+                return;
+            }
+            container.innerHTML = thoughts.map(t => `
+                <div class="thought-item">
+                    <span class="thought-text">"${t.text}"</span>
+                    <span class="thought-date">${t.date}</span>
+                    <button class="delete-btn" onclick="adminDeleteThought(${t.id})" style="padding: 6px 12px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function adminAddThought() {
+            const text = document.getElementById('thoughtText').value.trim();
+            if (!text) {
+                showToast('Please enter a thought');
+                return;
+            }
+            createThought(text);
+            document.getElementById('thoughtText').value = '';
+            loadThoughts();
+            showToast('Thought added!');
+        }
+
+        function adminDeleteThought(id) {
+            if (confirm('Delete this thought?')) {
+                removeThought(id);
+                loadThoughts();
+                showToast('Thought deleted');
+            }
+        }
+
+        // ===== MODAL =====
+        function closeModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            currentEditType = null;
+            currentEditId = null;
+        }
+
+        function saveModal() {
+            if (currentEditType === 'gallery') {
+                const id = currentEditId;
+                const src = document.getElementById('editSrc').value;
+                const title = document.getElementById('editTitle').value;
+                const description = document.getElementById('editDesc').value;
+                updateGalleryItem(id, src, title, description);
+                loadGallery();
+            } else if (currentEditType === 'memory') {
+                const id = currentEditId;
+                const src = document.getElementById('editSrc').value;
+                const title = document.getElementById('editTitle').value;
+                const date = document.getElementById('editDate').value;
+                const description = document.getElementById('editDesc').value;
+                updateMemory(id, src, title, description, date);
+                loadMemories();
+            }
+            closeModal();
+            showToast('Changes saved!');
+        }
+
+        // ===== PASSWORD =====
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (current !== getAdminPassword()) {
+                showToast('Current password is incorrect');
+                return;
+            }
+            if (newPass.length < 4) {
+                showToast('New password must be at least 4 characters');
+                return;
+            }
+            if (newPass !== confirm) {
+                showToast('New passwords do not match');
+                return;
+            }
+
+            setAdminPassword(newPass);
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            showToast('Password changed successfully!');
+        }
+
+        // ===== TOAST =====
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
