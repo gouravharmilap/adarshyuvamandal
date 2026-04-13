@@ -20,10 +20,12 @@
 
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
-        <a href="#home" class="nav-logo">
-            <img src="logo.jpg" alt="Adarsh Yuva Mandal Logo">
-            <span>आदर्श युवा मंडल</span>
-        </a>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="#home" class="nav-logo">
+                <img src="logo.jpg" alt="Adarsh Yuva Mandal Logo">
+                <span>आदर्श युवा मंडल</span>
+            </a>
+        </div>
         <ul class="nav-links" id="navLinks">
             <li><a href="#home" class="active">Home</a></li>
             <li><a href="#about">About</a></li>
@@ -31,7 +33,9 @@
             <li><a href="#memories">Memories</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
-        <a href="#contact" class="btn nav-join-btn">Join Us</a>
+        <a href="admin.html" class="btn nav-join-btn" target="_blank">
+            <i class="fas fa-user-shield"></i> Admin Login
+        </a>
         <div class="mobile-toggle" id="mobileToggle">
             <span></span>
             <span></span>
@@ -136,77 +140,8 @@
             <h2 class="section-title">Gallery</h2>
             <p class="section-subtitle">Moments captured from our journey of culture, devotion, and togetherness</p>
         </div>
-        <div class="gallery-grid">
-            <div class="gallery-item fade-in">
-                <img src="logo.jpg" alt="Adarsh Yuva Mandal Logo">
-                <div class="gallery-overlay">
-                    <h3>आदर्श युवा मंडल</h3>
-                    <p>Our Pride - Adarsh Yuva Mandal Logo</p>
-                </div>
-            </div>
-            <div class="gallery-item fade-in">
-                <img src="club photo.jpg" alt="Club Photo">
-                <div class="gallery-overlay">
-                    <h3>Club Members</h3>
-                    <p>United in spirit, bonded by tradition</p>
-                </div>
-            </div>
-            <div class="gallery-item fade-in">
-                <img src="memories.jpg" alt="Club Memories">
-                <div class="gallery-overlay">
-                    <h3>Annual Gathering</h3>
-                    <p>Cherished moments of unity and joy</p>
-                </div>
-            </div>
-            <div class="gallery-item fade-in">
-                <img src="memories 2.jpg" alt="Vishal Jagaran Memories">
-                <div class="gallery-overlay">
-                    <h3>Vishal Jagaran</h3>
-                    <p>Our grand cultural celebration</p>
-                </div>
-            </div>
-            <div class="gallery-item fade-in">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Mata_Rani_%28Durga%29.jpg/800px-Mata_Rani_%28Durga%29.jpg" alt="Mata Rani">
-                <div class="gallery-overlay">
-                    <h3>Mata Rani - Divine Mother</h3>
-                    <p>The source of all power and blessings</p>
-                </div>
-            </div>
-            <div class="gallery-item fade-in">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Durga_Parvati_%28Lotus_Mata%29.jpg/800px-Durga_Parvati_%28Lotus_Mata%29.jpg" alt="Durga Parvati">
-                <div class="gallery-overlay">
-                    <h3>Durga Parvati</h3>
-                    <p>Goddess of Power and Fortitude</p>
-                </div>
-            </div>
-            <div class="gallery-item fade-in">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Vijaya_Durga.jpg/800px-Vijaya_Durga.jpg" alt="Vijaya Durga">
-                <div class="gallery-overlay">
-                    <h3>Vijaya Durga</h3>
-                    <p>The Victorious Goddess</p>
-                </div>
-            </div>
-            <div class="gallery-item fade-in">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Goddess_Durga_on_lion.jpg/800px-Goddess_Durga_on_lion.jpg" alt="Durga on Lion">
-                <div class="gallery-overlay">
-                    <h3>Durgaji</h3>
-                    <p>Seated on Her Lion - Symbol of Courage</p>
-                </div>
-            </div>
-            <div class="gallery-item fade-in">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Durga_Battling_the_Buffalo_Demon.jpg/800px-Durga_Battling_the_Buffalo_Demon.jpg" alt="Mahishasura Mardini">
-                <div class="gallery-overlay">
-                    <h3>Mahishasura Mardini</h3>
-                    <p>The Demon Slayer - Divine Power</p>
-                </div>
-            </div>
-            <div class="gallery-item fade-in">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Bhuvaneswari.jpg/800px-Bhuvaneswari.jpg" alt="Bhuvaneswari">
-                <div class="gallery-overlay">
-                    <h3>Bhuvaneswari Mata</h3>
-                    <p>Queen of the Universe</p>
-                </div>
-            </div>
+        <div class="gallery-grid" id="galleryContainer">
+            <!-- Gallery items loaded dynamically from data.js -->
         </div>
     </section>
 
@@ -216,37 +151,8 @@
             <h2 class="section-title">Our Memories</h2>
             <p class="section-subtitle">Cherished moments from our journey of culture, service, and togetherness</p>
         </div>
-        <div class="memories-grid">
-            <div class="memory-item fade-in">
-                <div class="memory-image">
-                    <img src="memories.jpg" alt="Club Memories">
-                    <span class="memory-date">2024</span>
-                </div>
-                <div class="memory-content">
-                    <h3>Annual Gathering 2024</h3>
-                    <p>Our beloved members coming together for the annual celebration, filled with joy, devotion, and memorable performances.</p>
-                </div>
-            </div>
-            <div class="memory-item fade-in">
-                <div class="memory-image">
-                    <img src="memories 2.jpg" alt="Vishal Jagaran">
-                    <span class="memory-date">2024</span>
-                </div>
-                <div class="memory-content">
-                    <h3>Vishal Jagaran Festival</h3>
-                    <p>The grand celebration of our signature cultural festival featuring music, dance, and spiritual programs.</p>
-                </div>
-            </div>
-            <div class="memory-item fade-in">
-                <div class="memory-image">
-                    <img src="club photo.jpg" alt="Community Service">
-                    <span class="memory-date">2024</span>
-                </div>
-                <div class="memory-content">
-                    <h3>Social Welfare Initiative</h3>
-                    <p>Our members actively participating in community service, spreading joy and making a difference in lives.</p>
-                </div>
-            </div>
+        <div class="memories-grid" id="memoriesContainer">
+            <!-- Memories items loaded dynamically from data.js -->
         </div>
     </section>
 
@@ -272,6 +178,28 @@
                     <div style="font-size: 3rem; margin-bottom: 15px;">🍽️</div>
                     <h4 style="font-family: 'Playfair Display', serif; margin-bottom: 10px; color: var(--accent);">Community Feast</h4>
                     <p style="color: var(--text-muted); font-size: 0.9rem;">Langar and prasad distribution bringing the community together in harmony.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Thoughts History Section -->
+    <section class="section" id="thoughts">
+        <div class="section-header fade-in">
+            <h2 class="section-title">Thoughts & History</h2>
+            <p class="section-subtitle">Words of wisdom and moments from our journey</p>
+        </div>
+        <div class="memories-grid">
+            <div class="memory-item fade-in" style="border-left: 4px solid var(--accent);">
+                <div class="memory-content">
+                    <h3 style="font-style: italic; color: var(--accent);">"संस्कृति को जीवित रखो, दिल को जोड़ो।"</h3>
+                    <p style="margin-top: 15px; font-size: 0.85rem;">— April 2026</p>
+                </div>
+            </div>
+            <div class="memory-item fade-in" style="border-left: 4px solid var(--accent);">
+                <div class="memory-content">
+                    <h3 style="font-style: italic; color: var(--accent);">"Youth is the strength of tomorrow's society."</h3>
+                    <p style="margin-top: 15px; font-size: 0.85rem;">— March 2026</p>
                 </div>
             </div>
         </div>
@@ -412,16 +340,133 @@
         </div>
     </footer>
 
+    <!-- Live Notification Box -->
+    <div id="notificationBox" style="display: block !important; position: fixed; top: 80px; left: 20px; z-index: 9999; background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(22, 33, 62, 0.98)); backdrop-filter: blur(20px); border: 2px solid #d4af37; border-radius: 16px; padding: 0; width: 300px; box-shadow: 0 15px 50px rgba(0,0,0,0.6), 0 0 30px rgba(212, 175, 55, 0.15);">
+        <div style="background: linear-gradient(90deg, #aa8c2c, #d4af37, #aa8c2c); padding: 12px 16px; border-radius: 14px 14px 0 0; display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #0a0a12; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-bullhorn"></i> Latest Update
+            </span>
+            <button onclick="closeNotification()" style="background: rgba(0,0,0,0.2); border: none; color: #0a0a12; cursor: pointer; font-size: 0.75rem; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="notificationContent" style="padding: 16px; color: rgba(255, 255, 255, 0.95); font-size: 0.9rem; line-height: 1.6;">
+            Loading...
+        </div>
+    </div>
+
+    <script src="data.js?v=4"></script>
     <script>
+        // Debug: check if data.js loaded
+        console.log('data.js loaded, getUpdates exists:', typeof getUpdates === 'function');
+
         // Create particles
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 30; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 18 + 's';
-            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-            particlesContainer.appendChild(particle);
+        var particlesContainer = document.getElementById('particles');
+        if (particlesContainer) {
+            for (var i = 0; i < 30; i++) {
+                var particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 18 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize data
+        if (typeof initializeData === 'function') {
+            initializeData();
+        }
+
+        // Load gallery
+        (function() {
+            var gallery = [];
+            if (typeof getGallery === 'function') {
+                gallery = getGallery();
+            }
+            var container = document.getElementById('galleryContainer');
+            if (container) {
+                if (gallery.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No gallery items yet.</p>';
+                } else {
+                    var html = '';
+                    for (var i = 0; i < gallery.length; i++) {
+                        var item = gallery[i];
+                        html += '<div class="gallery-item fade-in">' +
+                            '<img src="' + item.src + '" alt="' + item.title + '" onerror="this.src=\'https://via.placeholder.com/400x300/1a1a2e/d4af37?text=Image+Not+Found\'">' +
+                            '<div class="gallery-overlay">' +
+                            '<h3>' + item.title + '</h3>' +
+                            '<p>' + item.description + '</p>' +
+                            '</div></div>';
+                    }
+                    container.innerHTML = html;
+                }
+            }
+        })();
+
+        // Load memories
+        (function() {
+            var memories = [];
+            if (typeof getMemories === 'function') {
+                memories = getMemories();
+            }
+            var container = document.getElementById('memoriesContainer');
+            if (container) {
+                if (memories.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No memories yet.</p>';
+                } else {
+                    var html = '';
+                    for (var i = 0; i < memories.length; i++) {
+                        var m = memories[i];
+                        html += '<div class="memory-item fade-in">' +
+                            '<div class="memory-image">' +
+                            '<img src="' + m.src + '" alt="' + m.title + '" onerror="this.src=\'https://via.placeholder.com/400x250/1a1a2e/d4af37?text=Image+Not+Found\'">' +
+                            '<span class="memory-date">' + m.date + '</span>' +
+                            '</div>' +
+                            '<div class="memory-content">' +
+                            '<h3>' + m.title + '</h3>' +
+                            '<p>' + m.description + '</p>' +
+                            '</div></div>';
+                    }
+                    container.innerHTML = html;
+                }
+            }
+        })();
+
+        // Load notification
+        (function() {
+            var notificationBox = document.getElementById('notificationBox');
+            var notificationContent = document.getElementById('notificationContent');
+
+            console.log('notificationBox:', notificationBox, 'notificationContent:', notificationContent);
+
+            if (!notificationBox || !notificationContent) {
+                console.log('Notification elements not found');
+                return;
+            }
+
+            var updates = [];
+            if (typeof getUpdates === 'function') {
+                updates = getUpdates();
+            }
+            console.log('Updates:', updates);
+
+            var latestUpdate = null;
+            if (updates && updates.length > 0) {
+                latestUpdate = updates[0];
+            }
+
+            if (!latestUpdate) {
+                latestUpdate = { text: "Vishal Jagaran 2026 registrations now open!", date: "2026-04-10" };
+            }
+
+            console.log('Setting notification:', latestUpdate);
+            notificationContent.innerHTML = '<div style="margin-bottom: 10px; color: #f4e4bc; font-weight: 500;">' + latestUpdate.text + '</div><div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; gap: 5px;"><i class="fas fa-calendar-alt"></i> ' + latestUpdate.date + '</div>';
+            notificationBox.style.display = 'block';
+        })();
+
+        function closeNotification() {
+            document.getElementById('notificationBox').style.display = 'none';
         }
 
         // Navbar scroll effect
@@ -438,18 +483,19 @@
         const mobileToggle = document.getElementById('mobileToggle');
         const navLinks = document.getElementById('navLinks');
 
-        mobileToggle.addEventListener('click', () => {
-            mobileToggle.classList.toggle('active');
-            navLinks.classList.toggle('active');
-        });
-
-        // Close mobile menu on link click
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileToggle.classList.remove('active');
-                navLinks.classList.remove('active');
+        if (mobileToggle && navLinks) {
+            mobileToggle.addEventListener('click', () => {
+                mobileToggle.classList.toggle('active');
+                navLinks.classList.toggle('active');
             });
-        });
+
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileToggle.classList.remove('active');
+                    navLinks.classList.remove('active');
+                });
+            });
+        }
 
         // Counter animation
         const counters = document.querySelectorAll('.counter');
@@ -479,7 +525,6 @@
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
 
-                    // Trigger counter animation
                     if (entry.target.classList.contains('stats-grid')) {
                         counters.forEach(counter => animateCounter(counter));
                     }
@@ -510,46 +555,48 @@
             });
         });
 
-        // Form submission with Formspree AJAX
+        // Form submission
         const form = document.getElementById('contactForm');
         const submitBtn = document.getElementById('submitBtn');
         const statusDiv = document.getElementById('formStatus');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        if (form && submitBtn && statusDiv) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-            statusDiv.style.display = 'none';
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                statusDiv.style.display = 'none';
 
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    headers: {
-                        'Accept': 'application/json'
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        statusDiv.style.display = 'block';
+                        statusDiv.style.color = '#4ecdc4';
+                        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Thank you! Your message has been sent. We will get back to you soon. 🙏';
+                        form.reset();
+                    } else {
+                        throw new Error('Failed to send');
                     }
-                });
-
-                if (response.ok) {
+                } catch (error) {
                     statusDiv.style.display = 'block';
-                    statusDiv.style.color = '#4ecdc4';
-                    statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Thank you! Your message has been sent. We will get back to you soon. 🙏';
-                    form.reset();
-                } else {
-                    throw new Error('Failed to send');
+                    statusDiv.style.color = '#ff6b6b';
+                    statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Sorry, there was an error. Please try again or email us directly.';
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
                 }
-            } catch (error) {
-                statusDiv.style.display = 'block';
-                statusDiv.style.color = '#ff6b6b';
-                statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Sorry, there was an error. Please try again or email us directly.';
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-            }
-        });
+            });
+        }
 
-        // Smooth scroll for all anchor links
+        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
