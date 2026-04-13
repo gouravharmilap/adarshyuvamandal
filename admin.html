@@ -578,7 +578,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="data.js?v=5"></script>
+    <script src="data.js?v=6"></script>
     <script>
         let currentEditType = null;
         let currentEditId = null;
@@ -586,34 +586,44 @@
 
         // Wait for data to load before enabling login
         async function initAdmin() {
+            console.log('initAdmin started');
             if (typeof initializeData === 'function') {
+                console.log('Calling initializeData...');
                 await initializeData();
             }
             // Wait for cache to be populated
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            console.log('Data initialization complete');
             dataReady = true;
+            console.log('dataReady:', dataReady);
 
             if (isLoggedIn()) {
+                console.log('Already logged in, showing admin panel');
                 showAdminPanel();
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded fired');
             initAdmin();
         });
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Login form submitted, dataReady:', dataReady);
             if (!dataReady) {
                 document.getElementById('loginError').textContent = 'Please wait, loading data...';
                 document.getElementById('loginError').style.display = 'block';
                 return;
             }
             const password = document.getElementById('passwordInput').value;
+            console.log('Password entered, verifying...');
             if (verifyAdminPassword(password)) {
+                console.log('Password correct, logging in');
                 setLoggedIn(true);
                 showAdminPanel();
             } else {
+                console.log('Password incorrect');
                 document.getElementById('loginError').textContent = 'Invalid password. Try again.';
                 document.getElementById('loginError').style.display = 'block';
             }

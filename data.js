@@ -24,17 +24,28 @@ let isOnline = false;
 
 // Initialize Supabase
 function initSupabase() {
+    console.log('Initializing Supabase...');
+    console.log('window.supabase exists:', typeof window.supabase !== 'undefined');
     if (typeof window !== 'undefined' && window.supabase) {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         isOnline = true;
+        console.log('Supabase client created successfully');
         return true;
     }
+    console.log('Supabase SDK not loaded yet');
     return false;
 }
 
 // Check if Supabase is loaded
 if (typeof window !== 'undefined') {
-    initSupabase();
+    // Wait for SDK to load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initSupabase, 100);
+        });
+    } else {
+        setTimeout(initSupabase, 100);
+    }
 }
 
 // Global data cache for synchronous access
@@ -43,12 +54,14 @@ let dataLoaded = false;
 
 // Load data from Supabase (async)
 async function loadDataFromSupabase() {
+    console.log('loadDataFromSupabase called, supabase:', !!supabase);
     if (!supabase) {
         console.log('Supabase not available, using defaults');
         return { ...DEFAULT_DATA };
     }
 
     try {
+        console.log('Fetching data from Supabase...');
         const { data, error } = await supabase
             .from('site_data')
             .select('data')
@@ -60,6 +73,7 @@ async function loadDataFromSupabase() {
             return { ...DEFAULT_DATA };
         }
 
+        console.log('Data from Supabase:', data);
         if (data && data.data) {
             cachedData = data.data;
             dataLoaded = true;
