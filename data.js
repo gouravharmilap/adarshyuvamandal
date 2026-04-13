@@ -26,13 +26,17 @@ let isOnline = false;
 function initSupabase() {
     console.log('Initializing Supabase...');
     console.log('window.supabase exists:', typeof window.supabase !== 'undefined');
-    if (typeof window !== 'undefined' && window.supabase) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        isOnline = true;
-        console.log('Supabase client created successfully');
-        return true;
+    try {
+        if (typeof window !== 'undefined' && window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            isOnline = true;
+            console.log('Supabase client created successfully');
+            return true;
+        }
+        console.log('Supabase SDK not loaded yet');
+    } catch (e) {
+        console.error('Error initializing Supabase:', e);
     }
-    console.log('Supabase SDK not loaded yet');
     return false;
 }
 
@@ -41,10 +45,10 @@ if (typeof window !== 'undefined') {
     // Wait for SDK to load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(initSupabase, 100);
+            setTimeout(initSupabase, 500);
         });
     } else {
-        setTimeout(initSupabase, 100);
+        setTimeout(initSupabase, 500);
     }
 }
 
