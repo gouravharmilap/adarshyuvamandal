@@ -578,11 +578,17 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="data.js?v=6"></script>
+    <script src="data.js?v=7"></script>
     <script>
         let currentEditType = null;
         let currentEditId = null;
         let dataReady = false;
+
+        // Fallback verifyAdminPassword in case data.js hasn't loaded properly
+        function verifyAdminPassword(password) {
+            console.log('verifyAdminPassword called, input:', password, 'stored:', getAdminPassword());
+            return password === getAdminPassword();
+        }
 
         // Wait for data to load before enabling login
         async function initAdmin() {
