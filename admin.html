@@ -597,6 +597,14 @@
             }
         }
 
+        function setLoggedIn(value) {
+            sessionStorage.setItem('aym_admin_logged_in', value ? 'true' : 'false');
+        }
+
+        function isLoggedIn() {
+            return sessionStorage.getItem('aym_admin_logged_in') === 'true';
+        }
+
         // Wait for data to load before enabling login
         async function initAdmin() {
             console.log('initAdmin started');
