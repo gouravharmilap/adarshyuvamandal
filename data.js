@@ -12,7 +12,7 @@ const SUPABASE_URL = 'https://dlkjoppjmojmudtkkipj.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_H7kA6cm39MKy1ObVqZbwnA_7ns59Bk1';
 
 // Cache-busting version
-const DATA_VERSION = 10;
+const DATA_VERSION = 11;
 
 // Default admin password
 const DEFAULT_ADMIN_PASSWORD = "aym2026admin";
