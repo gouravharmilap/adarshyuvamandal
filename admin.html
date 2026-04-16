@@ -586,8 +586,15 @@
 
         // Fallback verifyAdminPassword in case data.js hasn't loaded properly
         function verifyAdminPassword(password) {
-            console.log('verifyAdminPassword called, input:', password, 'stored:', getAdminPassword());
-            return password === getAdminPassword();
+            try {
+                const storedPassword = (typeof getAdminPassword === 'function') ? getAdminPassword() : 'aym2026admin';
+                console.log('verifyAdminPassword called, input:', password, 'stored:', storedPassword);
+                return password === storedPassword;
+            } catch (e) {
+                console.error('verifyAdminPassword error:', e);
+                // Fallback to default password
+                return password === 'aym2026admin';
+            }
         }
 
         // Wait for data to load before enabling login
@@ -624,13 +631,19 @@
             }
             const password = document.getElementById('passwordInput').value;
             console.log('Password entered, verifying...');
-            if (verifyAdminPassword(password)) {
-                console.log('Password correct, logging in');
-                setLoggedIn(true);
-                showAdminPanel();
-            } else {
-                console.log('Password incorrect');
-                document.getElementById('loginError').textContent = 'Invalid password. Try again.';
+            try {
+                if (verifyAdminPassword(password)) {
+                    console.log('Password correct, logging in');
+                    setLoggedIn(true);
+                    showAdminPanel();
+                } else {
+                    console.log('Password incorrect');
+                    document.getElementById('loginError').textContent = 'Invalid password. Try again.';
+                    document.getElementById('loginError').style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                document.getElementById('loginError').textContent = 'Error: ' + err.message;
                 document.getElementById('loginError').style.display = 'block';
             }
         });
