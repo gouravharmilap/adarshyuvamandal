@@ -1,12 +1,18 @@
 // Data Management System for Adarsh Yuva Mandal
 // Uses localStorage + Supabase for cloud sync
 
-// Check if we're in browser
 const isBrowser = typeof window !== 'undefined';
 
-// Supabase Configuration
+// ============================================
+// SUPABASE CONFIGURATION
+// Replace these with your actual Supabase credentials
+// Get them from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
+// ============================================
 const SUPABASE_URL = 'https://dlkjoppjmojmudtkkipj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa2pvcHBqbW9qdHVka2tpcGoiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTY4MzgxOTIwMCwiZXhwIjoxOTk5Mzk1MjAwfQ.u5M0b5K8Z4K5Q5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5';
+const SUPABASE_ANON_KEY = 'sb_publishable_H7kA6cm39MKy1ObVqZbwnA_7ns59Bk1';
+
+// Cache-busting version
+const DATA_VERSION = 10;
 
 // Default admin password
 const DEFAULT_ADMIN_PASSWORD = "aym2026admin";
@@ -25,26 +31,37 @@ const DEFAULT_DATA = {
 let cachedData = null;
 let dataLoaded = false;
 let supabase = null;
+let useLocalOnly = false;
 
-// Try to initialize Supabase
+// Initialize Supabase client
 function initSupabase() {
-    if (!isBrowser) return;
+    if (!isBrowser) return false;
+
+    // Check if credentials are configured
+    if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+        console.log('Supabase not configured - using localStorage only');
+        useLocalOnly = true;
+        return false;
+    }
 
     try {
         if (window.supabase) {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase initialized');
+            console.log('Supabase client initialized');
+            return true;
         }
     } catch (e) {
-        console.log('Supabase init failed:', e.message);
+        console.error('Supabase init failed:', e.message);
+        useLocalOnly = true;
     }
+    return false;
 }
 
-// Initialize data - tries Supabase first, falls back to localStorage
+// Initialize data - load from localStorage first, then sync with Supabase
 async function initializeData() {
-    console.log('initializeData called');
+    console.log('initializeData called, DATA_VERSION:', DATA_VERSION);
 
-    // First try to load from localStorage as immediate fallback
+    // Always load from localStorage first for immediate access
     try {
         const localData = localStorage.getItem('aym_data');
         if (localData) {
@@ -52,11 +69,14 @@ async function initializeData() {
             console.log('Loaded from localStorage');
         }
     } catch (e) {
-        console.log('localStorage read failed');
+        console.log('localStorage read failed:', e.message);
     }
 
-    // Then try Supabase
-    if (supabase) {
+    // Initialize Supabase
+    initSupabase();
+
+    // If Supabase is configured, try to sync with cloud
+    if (supabase && !useLocalOnly) {
         try {
             console.log('Fetching from Supabase...');
             const { data, error } = await supabase
@@ -65,10 +85,16 @@ async function initializeData() {
                 .eq('id', 'main')
                 .single();
 
-            if (!error && data && data.data) {
+            if (error) {
+                console.log('Supabase fetch error:', error.message);
+                // If table doesn't exist, try to create it
+                if (error.code === '42P01') {
+                    console.log('Table may not exist - run supabase-setup.sql');
+                }
+            } else if (data && data.data) {
                 cachedData = data.data;
-                console.log('Loaded from Supabase');
-                // Also save to localStorage for offline
+                console.log('Loaded from Supabase cloud');
+                // Update localStorage with cloud data
                 localStorage.setItem('aym_data', JSON.stringify(data.data));
             }
         } catch (e) {
@@ -78,11 +104,12 @@ async function initializeData() {
 
     // If still no data, use default
     if (!cachedData) {
-        cachedData = { ...DEFAULT_DATA };
+        cachedData = JSON.parse(JSON.stringify(DEFAULT_DATA));
         console.log('Using default data');
     }
 
     dataLoaded = true;
+    console.log('Data ready');
 }
 
 // Synchronous getData
@@ -90,24 +117,25 @@ function getData() {
     if (cachedData) {
         return cachedData;
     }
-    return { ...DEFAULT_DATA };
+    return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
 
-// Save data
+// Save data - always saves to localStorage, syncs to Supabase when available
 async function saveData(data) {
     cachedData = data;
 
-    // Save to localStorage immediately
+    // Always save to localStorage immediately
     try {
         localStorage.setItem('aym_data', JSON.stringify(data));
+        localStorage.setItem('aym_data_version', DATA_VERSION);
     } catch (e) {
-        console.log('localStorage save failed');
+        console.error('localStorage save failed:', e);
     }
 
-    // Save to Supabase async
-    if (supabase) {
+    // Also save to Supabase cloud if configured
+    if (supabase && !useLocalOnly) {
         try {
-            await supabase
+            const { error } = await supabase
                 .from('site_data')
                 .upsert({
                     id: 'main',
@@ -116,9 +144,14 @@ async function saveData(data) {
                 }, {
                     onConflict: 'id'
                 });
-            console.log('Saved to Supabase');
+
+            if (error) {
+                console.log('Supabase save error:', error.message);
+            } else {
+                console.log('Saved to Supabase cloud');
+            }
         } catch (e) {
-            console.log('Supabase save failed:', e.message);
+            console.error('Supabase save failed:', e.message);
         }
     }
 }
@@ -136,7 +169,6 @@ function getAdminPassword() {
 }
 
 function verifyAdminPassword(password) {
-    console.log('verifyAdminPassword called, input:', password, 'stored:', getAdminPassword());
     return password === getAdminPassword();
 }
 
@@ -291,7 +323,13 @@ function removeThought(id) {
     saveData(data);
 }
 
-// Initialize when script loads
-if (isBrowser) {
-    initSupabase();
-}
+// ============================================
+// SETUP INSTRUCTIONS:
+// ============================================
+// 1. Go to https://supabase.com and create a new project
+// 2. Go to Project Settings > API
+// 3. Copy the "Project URL" and "anon public" key
+// 4. Replace SUPABASE_URL and SUPABASE_ANON_KEY values above
+// 5. Go to SQL Editor in Supabase dashboard and run supabase-setup.sql
+// 6. Deploy your updated files
+// ============================================

@@ -577,8 +577,8 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="data.js?v=7"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="data.js?v=10"></script>
     <script>
         let currentEditType = null;
         let currentEditId = null;
@@ -948,11 +948,23 @@
         }
 
         // ===== PASSWORD =====
-        function changePassword() {
+        async function changePassword() {
             const current = document.getElementById('currentPassword').value;
             const newPass = document.getElementById('newPassword').value;
             const confirm = document.getElementById('confirmPassword').value;
 
+            if (!current) {
+                showToast('Please enter current password');
+                return;
+            }
+            if (!newPass) {
+                showToast('Please enter new password');
+                return;
+            }
+            if (!confirm) {
+                showToast('Please confirm new password');
+                return;
+            }
             if (current !== getAdminPassword()) {
                 showToast('Current password is incorrect');
                 return;
@@ -966,7 +978,7 @@
                 return;
             }
 
-            setAdminPassword(newPass);
+            await setAdminPassword(newPass);
             document.getElementById('currentPassword').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmPassword').value = '';
