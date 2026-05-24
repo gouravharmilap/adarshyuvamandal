@@ -189,19 +189,8 @@
             <h2 class="section-title">Thoughts & History</h2>
             <p class="section-subtitle">Words of wisdom and moments from our journey</p>
         </div>
-        <div class="memories-grid">
-            <div class="memory-item fade-in" style="border-left: 4px solid var(--accent);">
-                <div class="memory-content">
-                    <h3 style="font-style: italic; color: var(--accent);">"संस्कृति को जीवित रखो, दिल को जोड़ो।"</h3>
-                    <p style="margin-top: 15px; font-size: 0.85rem;">— April 2026</p>
-                </div>
-            </div>
-            <div class="memory-item fade-in" style="border-left: 4px solid var(--accent);">
-                <div class="memory-content">
-                    <h3 style="font-style: italic; color: var(--accent);">"Youth is the strength of tomorrow's society."</h3>
-                    <p style="margin-top: 15px; font-size: 0.85rem;">— March 2026</p>
-                </div>
-            </div>
+        <div class="memories-grid" id="thoughtsContainer">
+            <!-- Thoughts loaded dynamically from data.js -->
         </div>
     </section>
 
@@ -225,7 +214,7 @@
             <div class="contact-card fade-in">
                 <div class="icon">✉️</div>
                 <h4>Email</h4>
-                <p>info@adarshyuvamandal.org<br>vishaljagaran@aym.org<br>join@adarshyuvamandal.org</p>
+                <p>adarshyuvamandalrairmunakpull@gmail.com<br>nill<br>join@adarshyuvamandal.org</p>
             </div>
         </div>
 
@@ -327,7 +316,7 @@
             <div class="footer-links">
                 <h4>Contact</h4>
                 <ul>
-                    <li><a href="tel:+919876543210">+91 98765 43210</a></li>
+                    <li><a href="tel:+919996752108">+91 99967 52108</a></li>
                     <li><a href="mailto:info@adarshyuvamandal.org">info@adarshyuvamandal.org</a></li>
                     <li>Rair, Munak Pull, Karnal</li>
                     <li>Haryana - 132040</li>
@@ -356,7 +345,7 @@
     </div>
 
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="data.js?v=11"></script>
+    <script src="data.js?v=15"></script>
     <script>
         // Debug: check if data.js loaded
         console.log('data.js loaded, getUpdates exists:', typeof getUpdates === 'function');
@@ -464,6 +453,31 @@
 
                 notificationContent.innerHTML = '<div style="margin-bottom: 10px; color: #f4e4bc; font-weight: 500;">' + latestUpdate.text + '</div><div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; gap: 5px;"><i class="fas fa-calendar-alt"></i> ' + latestUpdate.date + '</div>';
                 notificationBox.style.display = 'block';
+            })();
+
+            // Load thoughts
+            (function() {
+                var thoughts = [];
+                if (typeof getThoughts === 'function') {
+                    thoughts = getThoughts();
+                }
+                var container = document.getElementById('thoughtsContainer');
+                if (container) {
+                    if (thoughts.length === 0) {
+                        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No thoughts yet.</p>';
+                    } else {
+                        var html = '';
+                        for (var i = 0; i < thoughts.length; i++) {
+                            var t = thoughts[i];
+                            html += '<div class="memory-item fade-in" style="border-left: 4px solid var(--accent);">' +
+                                '<div class="memory-content">' +
+                                '<h3 style="font-style: italic; color: var(--accent);">"' + t.text + '"</h3>' +
+                                '<p style="margin-top: 15px; font-size: 0.85rem;">— ' + t.date + '</p>' +
+                                '</div></div>';
+                        }
+                        container.innerHTML = html;
+                    }
+                }
             })();
         }
 

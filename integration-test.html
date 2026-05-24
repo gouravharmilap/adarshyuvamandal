@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Full Integration Test</title>
+</head>
+<body>
+    <h1>Full Integration Test</h1>
+    <pre id="output" style="background:#1a1a2e;color:#fff;padding:20px;overflow:auto;height:500px;">Testing...</pre>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="data.js?v=15"></script>
+    <script>
+        const output = document.getElementById('output');
+        function log(msg) {
+            output.textContent += msg + '\n';
+            console.log(msg);
+        }
+
+        async function test() {
+            log('=== STEP 1: Clear old localStorage ===');
+            localStorage.removeItem('aym_data');
+            localStorage.removeItem('aym_data_version');
+            log('Cleared');
+
+            log('\n=== STEP 2: Initialize data ===');
+            await initializeData();
+            log('Init complete');
+
+            log('\n=== STEP 3: Check loaded data ===');
+            log('cachedData: ' + JSON.stringify(cachedData));
+
+            log('\n=== STEP 4: Check functions ===');
+            log('getUpdates(): ' + JSON.stringify(getUpdates()));
+            log('getThoughts(): ' + JSON.stringify(getThoughts()));
+            log('getGallery(): ' + JSON.stringify(getGallery()));
+
+            log('\n=== STEP 5: Add a thought ===');
+            createThought('Test thought from integration test');
+            log('Thought added');
+
+            log('\n=== STEP 6: Verify saved ===');
+            const newData = cachedData;
+            log('New thoughts: ' + JSON.stringify(newData.thoughts));
+
+            log('\n=== STEP 7: Check localStorage ===');
+            log('localStorage aym_data: ' + localStorage.getItem('aym_data'));
+
+            log('\n=== TEST COMPLETE ===');
+            log('If you see "Saved to Supabase cloud" in console, sync worked!');
+        }
+
+        test();
+    </script>
+</body>
+</html>

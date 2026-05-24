@@ -5,14 +5,12 @@ const isBrowser = typeof window !== 'undefined';
 
 // ============================================
 // SUPABASE CONFIGURATION
-// Replace these with your actual Supabase credentials
-// Get them from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
 // ============================================
 const SUPABASE_URL = 'https://dlkjoppjmojmudtkkipj.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_H7kA6cm39MKy1ObVqZbwnA_7ns59Bk1';
 
 // Cache-busting version
-const DATA_VERSION = 11;
+const DATA_VERSION = 15;
 
 // Default admin password
 const DEFAULT_ADMIN_PASSWORD = "aym2026admin";
@@ -37,31 +35,50 @@ let useLocalOnly = false;
 function initSupabase() {
     if (!isBrowser) return false;
 
-    // Check if credentials are configured
-    if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-        console.log('Supabase not configured - using localStorage only');
-        useLocalOnly = true;
-        return false;
-    }
-
     try {
-        if (window.supabase) {
+        if (typeof window.supabase !== 'undefined') {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.log('Supabase client initialized');
             return true;
         }
     } catch (e) {
         console.error('Supabase init failed:', e.message);
-        useLocalOnly = true;
     }
     return false;
 }
 
-// Initialize data - load from localStorage first, then sync with Supabase
+// Initialize data
 async function initializeData() {
     console.log('initializeData called, DATA_VERSION:', DATA_VERSION);
 
-    // Always load from localStorage first for immediate access
+    // Wait a moment for CDN to load
+    await new Promise(r => setTimeout(r, 500));
+
+    // Init Supabase
+    initSupabase();
+
+    // Try Supabase first
+    if (supabase) {
+        try {
+            console.log('Fetching from Supabase...');
+            const { data, error } = await supabase
+                .from('site_data')
+                .select('data')
+                .eq('id', 'main');
+
+            if (!error && data && data.length > 0) {
+                cachedData = data[0].data;
+                console.log('Loaded from Supabase cloud');
+                localStorage.setItem('aym_data', JSON.stringify(cachedData));
+                dataLoaded = true;
+                return;
+            }
+        } catch (e) {
+            console.log('Supabase fetch failed:', e.message);
+        }
+    }
+
+    // Fall back to localStorage
     try {
         const localData = localStorage.getItem('aym_data');
         if (localData) {
@@ -69,40 +86,9 @@ async function initializeData() {
             console.log('Loaded from localStorage');
         }
     } catch (e) {
-        console.log('localStorage read failed:', e.message);
+        console.log('localStorage read failed');
     }
 
-    // Initialize Supabase
-    initSupabase();
-
-    // If Supabase is configured, try to sync with cloud
-    if (supabase && !useLocalOnly) {
-        try {
-            console.log('Fetching from Supabase...');
-            const { data, error } = await supabase
-                .from('site_data')
-                .select('data')
-                .eq('id', 'main')
-                .single();
-
-            if (error) {
-                console.log('Supabase fetch error:', error.message);
-                // If table doesn't exist, try to create it
-                if (error.code === '42P01') {
-                    console.log('Table may not exist - run supabase-setup.sql');
-                }
-            } else if (data && data.data) {
-                cachedData = data.data;
-                console.log('Loaded from Supabase cloud');
-                // Update localStorage with cloud data
-                localStorage.setItem('aym_data', JSON.stringify(data.data));
-            }
-        } catch (e) {
-            console.log('Supabase fetch failed:', e.message);
-        }
-    }
-
-    // If still no data, use default
     if (!cachedData) {
         cachedData = JSON.parse(JSON.stringify(DEFAULT_DATA));
         console.log('Using default data');
@@ -114,26 +100,21 @@ async function initializeData() {
 
 // Synchronous getData
 function getData() {
-    if (cachedData) {
-        return cachedData;
-    }
+    if (cachedData) return cachedData;
     return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
 
-// Save data - always saves to localStorage, syncs to Supabase when available
+// Save data
 async function saveData(data) {
     cachedData = data;
 
-    // Always save to localStorage immediately
     try {
         localStorage.setItem('aym_data', JSON.stringify(data));
-        localStorage.setItem('aym_data_version', DATA_VERSION);
     } catch (e) {
         console.error('localStorage save failed:', e);
     }
 
-    // Also save to Supabase cloud if configured
-    if (supabase && !useLocalOnly) {
+    if (supabase) {
         try {
             const { error } = await supabase
                 .from('site_data')
@@ -141,8 +122,6 @@ async function saveData(data) {
                     id: 'main',
                     data: data,
                     updated_at: new Date().toISOString()
-                }, {
-                    onConflict: 'id'
                 });
 
             if (error) {
@@ -322,14 +301,3 @@ function removeThought(id) {
     data.thoughts = data.thoughts.filter(t => t.id !== id);
     saveData(data);
 }
-
-// ============================================
-// SETUP INSTRUCTIONS:
-// ============================================
-// 1. Go to https://supabase.com and create a new project
-// 2. Go to Project Settings > API
-// 3. Copy the "Project URL" and "anon public" key
-// 4. Replace SUPABASE_URL and SUPABASE_ANON_KEY values above
-// 5. Go to SQL Editor in Supabase dashboard and run supabase-setup.sql
-// 6. Deploy your updated files
-// ============================================
