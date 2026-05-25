@@ -1,14 +1,19 @@
 const STORAGE_KEY = 'aym_website_data';
 const SUPABASE_URL = 'https://dlkjoppjmojmudtkkipj.supabase.co';
-const SUPABASE_ANON_KEY = 'sbp_3153c74aef155e7dd27b8afb490da311d2059941';
+
+// 1. Replace this placeholder with your REAL Supabase 'anon' key (starts with eyJ...)
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa2pvcHBqbW9qbXVkdGtraXBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDAxOTEsImV4cCI6MjA5MTY3NjE5MX0.uGfMM2k5LkajACxyAgxnH-y8XxaVM_CDhxJ9LEAb-7g';
 
 let supabaseClient = null;
 
 // Initialization
 if (typeof supabase !== 'undefined') {
-    if (SUPABASE_ANON_KEY !== 'sbp_3153c74aef155e7dd27b8afb490da311d2059941') {
-        console.log('Supabase: Initializing client...');
+    // Check if the key looks like a valid Supabase key (starts with eyJ)
+    if (SUPABASE_ANON_KEY.startsWith('eyJ')) {
+        console.log('Supabase: Initializing cloud sync...');
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else if (SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa2pvcHBqbW9qbXVkdGtraXBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDAxOTEsImV4cCI6MjA5MTY3NjE5MX0.uGfMM2k5LkajACxyAgxnH-y8XxaVM_CDhxJ9LEAb-7g') {
+        console.error('Supabase Error: The key you provided does not look like a Supabase key. It should start with "eyJ".');
     } else {
         console.error('Supabase Error: You are still using the placeholder ANON_KEY. Cloud sync will not work.');
     }
@@ -33,14 +38,15 @@ async function initializeData() {
             const { data, error } = await supabaseClient
                 .from('site_data')
                 .select('data')
-                .eq('id', 'main')
-                .maybeSingle(); // Better for fetching a single row
+                .eq('id', 'main');
 
             if (error) throw error;
 
-            if (data && data.data) {
+            const row = data && data[0];
+
+            if (row && row.data) {
                 // Successfully got cloud data
-                const cloudData = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
+                const cloudData = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
                 
                 // Merge cloud data with local to ensure passwords etc exist
                 const mergedData = { ...defaultData, ...cloudData };
@@ -53,7 +59,7 @@ async function initializeData() {
             // If table is empty, upload what we currently have in local storage to the cloud
             const localData = localStorage.getItem(STORAGE_KEY);
             if (localData) {
-                console.log('Supabase: Cloud empty/new, pushing current local data...');
+                console.log('Supabase: Cloud is empty, uploading initial data from this device...');
                 saveData(JSON.parse(localData));
             }
         } catch (err) {
