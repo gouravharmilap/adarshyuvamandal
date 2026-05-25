@@ -363,22 +363,45 @@
             }
         }
 
+        // Initialize observer and refresh it when new content is added
+        let observer;
+        function initObserver() {
+            const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+            observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        if (entry.target.classList.contains('stats-grid')) {
+                            document.querySelectorAll('.counter').forEach(counter => animateCounter(counter));
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            // Initial observation
+            document.querySelectorAll('.fade-in, .slide-left, .slide-right').forEach(el => observer.observe(el));
+        }
+
+        function refreshAnimations() {
+            if (observer) {
+                document.querySelectorAll('.fade-in:not(.visible), .slide-left:not(.visible), .slide-right:not(.visible)').forEach(el => {
+                    observer.observe(el);
+                });
+            }
+        }
+
         // Wait for data to load, then render
         async function initPage() {
+            initObserver();
+
             // Initialize and wait for data
             if (typeof initializeData === 'function') {
                 await initializeData();
             }
 
-            // Small delay to ensure cache is populated
-            await new Promise(resolve => setTimeout(resolve, 500));
-
             // Load gallery
             (function() {
-                var gallery = [];
-                if (typeof getGallery === 'function') {
-                    gallery = getGallery();
-                }
+                var gallery = typeof getGallery === 'function' ? getGallery() : [];
                 var container = document.getElementById('galleryContainer');
                 if (container) {
                     if (gallery.length === 0) {
@@ -401,10 +424,7 @@
 
             // Load memories
             (function() {
-                var memories = [];
-                if (typeof getMemories === 'function') {
-                    memories = getMemories();
-                }
+                var memories = typeof getMemories === 'function' ? getMemories() : [];
                 var container = document.getElementById('memoriesContainer');
                 if (container) {
                     if (memories.length === 0) {
@@ -432,15 +452,9 @@
             (function() {
                 var notificationBox = document.getElementById('notificationBox');
                 var notificationContent = document.getElementById('notificationContent');
+                if (!notificationBox || !notificationContent) return;
 
-                if (!notificationBox || !notificationContent) {
-                    return;
-                }
-
-                var updates = [];
-                if (typeof getUpdates === 'function') {
-                    updates = getUpdates();
-                }
+                var updates = typeof getUpdates === 'function' ? getUpdates() : [];
 
                 var latestUpdate = null;
                 if (updates && updates.length > 0) {
@@ -457,10 +471,7 @@
 
             // Load thoughts
             (function() {
-                var thoughts = [];
-                if (typeof getThoughts === 'function') {
-                    thoughts = getThoughts();
-                }
+                var thoughts = typeof getThoughts === 'function' ? getThoughts() : [];
                 var container = document.getElementById('thoughtsContainer');
                 if (container) {
                     if (thoughts.length === 0) {
@@ -479,6 +490,9 @@
                     }
                 }
             })();
+
+            // Make newly added items visible
+            refreshAnimations();
         }
 
         // Start page initialization
@@ -532,28 +546,6 @@
                 counter.innerText = target;
             }
         };
-
-        // Intersection Observer for animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-
-                    if (entry.target.classList.contains('stats-grid')) {
-                        counters.forEach(counter => animateCounter(counter));
-                    }
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.fade-in, .slide-left, .slide-right').forEach(el => {
-            observer.observe(el);
-        });
 
         // Active nav link
         const sections = document.querySelectorAll('section');

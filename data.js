@@ -52,7 +52,7 @@ async function initializeData() {
                     ...defaultData,
                     ...cloudData,
                     updates: cloudData.updates || [],
-                    gallery: (cloudData.gallery && cloudData.gallery.length > 0) ? cloudData.gallery : defaultData.gallery,
+                    gallery: cloudData.gallery || defaultData.gallery,
                     memories: cloudData.memories || [],
                     thoughts: cloudData.thoughts || []
                 };
