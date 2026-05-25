@@ -1,303 +1,187 @@
-// Data Management System for Adarsh Yuva Mandal
-// Uses localStorage + Supabase for cloud sync
+const STORAGE_KEY = 'aym_website_data';
 
-const isBrowser = typeof window !== 'undefined';
-
-// ============================================
-// SUPABASE CONFIGURATION
-// ============================================
-const SUPABASE_URL = 'https://dlkjoppjmojmudtkkipj.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_H7kA6cm39MKy1ObVqZbwnA_7ns59Bk1';
-
-// Cache-busting version
-const DATA_VERSION = 15;
-
-// Default admin password
-const DEFAULT_ADMIN_PASSWORD = "aym2026admin";
-
-// Default data structure
-const DEFAULT_DATA = {
-    updates: [
-        { id: 1, text: "🎉 Vishal Jagaran 2026 registrations now open!", date: "2026-04-10", active: true }
-    ],
+const defaultData = {
+    updates: [],
     gallery: [],
     memories: [],
-    thoughts: []
+    thoughts: [],
+    adminPassword: 'aym2026admin'
 };
 
-// Global data cache
-let cachedData = null;
-let dataLoaded = false;
-let supabase = null;
-let useLocalOnly = false;
-
-// Initialize Supabase client
-function initSupabase() {
-    if (!isBrowser) return false;
-
-    try {
-        if (typeof window.supabase !== 'undefined') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase client initialized');
-            return true;
-        }
-    } catch (e) {
-        console.error('Supabase init failed:', e.message);
-    }
-    return false;
-}
-
-// Initialize data
 async function initializeData() {
-    console.log('initializeData called, DATA_VERSION:', DATA_VERSION);
-
-    // Wait a moment for CDN to load
-    await new Promise(r => setTimeout(r, 500));
-
-    // Init Supabase
-    initSupabase();
-
-    // Try Supabase first
-    if (supabase) {
-        try {
-            console.log('Fetching from Supabase...');
-            const { data, error } = await supabase
-                .from('site_data')
-                .select('data')
-                .eq('id', 'main');
-
-            if (!error && data && data.length > 0) {
-                cachedData = data[0].data;
-                console.log('Loaded from Supabase cloud');
-                localStorage.setItem('aym_data', JSON.stringify(cachedData));
-                dataLoaded = true;
-                return;
-            }
-        } catch (e) {
-            console.log('Supabase fetch failed:', e.message);
-        }
+    if (!localStorage.getItem(STORAGE_KEY)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
     }
-
-    // Fall back to localStorage
-    try {
-        const localData = localStorage.getItem('aym_data');
-        if (localData) {
-            cachedData = JSON.parse(localData);
-            console.log('Loaded from localStorage');
-        }
-    } catch (e) {
-        console.log('localStorage read failed');
-    }
-
-    if (!cachedData) {
-        cachedData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-        console.log('Using default data');
-    }
-
-    dataLoaded = true;
-    console.log('Data ready');
 }
 
-// Synchronous getData
 function getData() {
-    if (cachedData) return cachedData;
-    return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
 }
 
-// Save data
-async function saveData(data) {
-    cachedData = data;
-
-    try {
-        localStorage.setItem('aym_data', JSON.stringify(data));
-    } catch (e) {
-        console.error('localStorage save failed:', e);
-    }
-
-    if (supabase) {
-        try {
-            const { error } = await supabase
-                .from('site_data')
-                .upsert({
-                    id: 'main',
-                    data: data,
-                    updated_at: new Date().toISOString()
-                });
-
-            if (error) {
-                console.log('Supabase save error:', error.message);
-            } else {
-                console.log('Saved to Supabase cloud');
-            }
-        } catch (e) {
-            console.error('Supabase save failed:', e.message);
-        }
-    }
+function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-// ===== ADMIN PASSWORD =====
-function setAdminPassword(password) {
+// PASSWORD
+function getAdminPassword() {
+    return getData().adminPassword;
+}
+
+async function setAdminPassword(password) {
     const data = getData();
     data.adminPassword = password;
     saveData(data);
 }
 
-function getAdminPassword() {
-    const data = getData();
-    return data.adminPassword || DEFAULT_ADMIN_PASSWORD;
-}
+// ==================== UPDATES ====================
 
-function verifyAdminPassword(password) {
-    return password === getAdminPassword();
-}
-
-function isLoggedIn() {
-    return sessionStorage.getItem('aym_admin_logged_in') === 'true';
-}
-
-function setLoggedIn(value) {
-    sessionStorage.setItem('aym_admin_logged_in', value ? 'true' : 'false');
-}
-
-// ===== UPDATE FUNCTIONS =====
 function getUpdates() {
-    const data = getData();
-    return (data.updates || []).filter(u => u.active);
+    return getData().updates.filter(u => u.active !== false);
 }
 
 function getAllUpdates() {
-    return getData().updates || [];
+    return getData().updates;
 }
 
 function createUpdate(text) {
     const data = getData();
-    if (!data.updates) data.updates = [];
-    const newUpdate = {
+
+    data.updates.unshift({
         id: Date.now(),
         text: text,
         date: new Date().toISOString().split('T')[0],
         active: true
-    };
-    data.updates.unshift(newUpdate);
+    });
+
     saveData(data);
-    return newUpdate;
 }
 
 function toggleUpdateStatus(id) {
     const data = getData();
-    if (!data.updates) data.updates = [];
-    const update = data.updates.find(u => u.id === id);
-    if (update) {
-        update.active = !update.active;
-        saveData(data);
+
+    const item = data.updates.find(u => u.id === id);
+
+    if (item) {
+        item.active = !item.active;
     }
+
+    saveData(data);
 }
 
 function removeUpdate(id) {
     const data = getData();
-    if (!data.updates) data.updates = [];
+
     data.updates = data.updates.filter(u => u.id !== id);
+
     saveData(data);
 }
 
-// ===== GALLERY FUNCTIONS =====
+// ==================== GALLERY ====================
+
 function getGallery() {
-    return getData().gallery || [];
+    return getData().gallery;
 }
 
 function createGalleryItem(src, title, description) {
     const data = getData();
-    if (!data.gallery) data.gallery = [];
-    const newItem = {
+
+    data.gallery.push({
         id: Date.now(),
-        src: src,
-        title: title,
-        description: description || ''
-    };
-    data.gallery.push(newItem);
+        src,
+        title,
+        description
+    });
+
     saveData(data);
-    return newItem;
 }
 
 function updateGalleryItem(id, src, title, description) {
     const data = getData();
-    if (!data.gallery) data.gallery = [];
-    const index = data.gallery.findIndex(item => item.id === id);
-    if (index !== -1) {
-        data.gallery[index] = { id, src, title, description: description || '' };
-        saveData(data);
-        return true;
+
+    const item = data.gallery.find(g => g.id === id);
+
+    if (item) {
+        item.src = src;
+        item.title = title;
+        item.description = description;
     }
-    return false;
+
+    saveData(data);
 }
 
 function removeGalleryItem(id) {
     const data = getData();
-    if (!data.gallery) data.gallery = [];
-    data.gallery = data.gallery.filter(item => item.id !== id);
+
+    data.gallery = data.gallery.filter(g => g.id !== id);
+
     saveData(data);
 }
 
-// ===== MEMORIES FUNCTIONS =====
+// ==================== MEMORIES ====================
+
 function getMemories() {
-    return getData().memories || [];
+    return getData().memories;
 }
 
 function createMemory(src, title, description, date) {
     const data = getData();
-    if (!data.memories) data.memories = [];
-    const newMemory = {
+
+    data.memories.push({
         id: Date.now(),
-        src: src,
-        title: title,
-        description: description || '',
-        date: date || new Date().getFullYear().toString()
-    };
-    data.memories.push(newMemory);
+        src,
+        title,
+        description,
+        date
+    });
+
     saveData(data);
-    return newMemory;
 }
 
 function updateMemory(id, src, title, description, date) {
     const data = getData();
-    if (!data.memories) data.memories = [];
-    const index = data.memories.findIndex(m => m.id === id);
-    if (index !== -1) {
-        data.memories[index] = { id, src, title, description: description || '', date: date || '' };
-        saveData(data);
-        return true;
+
+    const item = data.memories.find(m => m.id === id);
+
+    if (item) {
+        item.src = src;
+        item.title = title;
+        item.description = description;
+        item.date = date;
     }
-    return false;
+
+    saveData(data);
 }
 
 function removeMemory(id) {
     const data = getData();
-    if (!data.memories) data.memories = [];
+
     data.memories = data.memories.filter(m => m.id !== id);
+
     saveData(data);
 }
 
-// ===== THOUGHTS FUNCTIONS =====
+// ==================== THOUGHTS ====================
+
 function getThoughts() {
-    return getData().thoughts || [];
+    return getData().thoughts;
 }
 
 function createThought(text) {
     const data = getData();
-    if (!data.thoughts) data.thoughts = [];
-    const newThought = {
+
+    data.thoughts.unshift({
         id: Date.now(),
-        text: text,
-        date: new Date().toISOString().split('T')[0]
-    };
-    data.thoughts.unshift(newThought);
+        text,
+        date: new Date().toLocaleDateString()
+    });
+
     saveData(data);
-    return newThought;
 }
 
 function removeThought(id) {
     const data = getData();
-    if (!data.thoughts) data.thoughts = [];
+
     data.thoughts = data.thoughts.filter(t => t.id !== id);
+
     saveData(data);
 }
