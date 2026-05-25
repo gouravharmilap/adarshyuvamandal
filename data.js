@@ -2,18 +2,18 @@ const STORAGE_KEY = 'aym_website_data';
 const SUPABASE_URL = 'https://dlkjoppjmojmudtkkipj.supabase.co';
 
 // 1. Replace this placeholder with your REAL Supabase 'anon' key (starts with eyJ...)
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa2pvcHBqbW9qbXVkdGtraXBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDAxOTEsImV4cCI6MjA5MTY3NjE5MX0.uGfMM2k5LkajACxyAgxnH-y8XxaVM_CDhxJ9LEAb-7g';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa2pvcHBqbW9qbXVkdGtraXBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDAxOTEsImV4cCI6MjA5MTY3NjE5MX0.uGfMM2k5LkajACxyAgxnH-y8XxaVM_CDhxJ9LEAb-7g'; // User provided this key, assuming it's correct.
 
 let supabaseClient = null;
 
 // Initialization
 if (typeof supabase !== 'undefined') {
     // Check if the key looks like a valid Supabase key (starts with eyJ)
-    if (SUPABASE_ANON_KEY.startsWith('eyJ')) {
+    if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('eyJ')) { // Added check for null/empty key
         console.log('Supabase: Initializing cloud sync...');
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else if (SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsa2pvcHBqbW9qbXVkdGtraXBqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDAxOTEsImV4cCI6MjA5MTY3NjE5MX0.uGfMM2k5LkajACxyAgxnH-y8XxaVM_CDhxJ9LEAb-7g') {
-        console.error('Supabase Error: The key you provided does not look like a Supabase key. It should start with "eyJ".');
+    } else if (SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY_HERE') { // Check for the placeholder specifically
+        console.error('Supabase Error: You are still using the placeholder ANON_KEY. Cloud sync will not work.');
     } else {
         console.error('Supabase Error: You are still using the placeholder ANON_KEY. Cloud sync will not work.');
     }
@@ -38,16 +38,16 @@ async function initializeData() {
             const { data, error } = await supabaseClient
                 .from('site_data')
                 .select('data')
-                .eq('id', 'main');
+                .eq('id', 'main')
+                .maybeSingle(); // Use maybeSingle to get a single object or null
 
             if (error) throw error;
 
-            const row = data && data[0];
-
-            if (row && row.data) {
+            if (data && data.data) { // 'data' here is the row object from maybeSingle
                 // Successfully got cloud data
-                const cloudData = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+                const cloudData = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
                 
+                // Merge cloud data with local to ensure passwords etc exist, cloud data takes precedence
                 // Merge cloud data with local to ensure passwords etc exist
                 const mergedData = { ...defaultData, ...cloudData };
                 
@@ -71,26 +71,60 @@ async function initializeData() {
     // Fallback if cloud fails or client not initialized
     const localData = localStorage.getItem(STORAGE_KEY);
     if (!localData) {
-        saveData(defaultData);
+        console.log('LocalStorage empty, initializing with default data.');
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
     }
 }
 
 function getData() {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : defaultData;
+    const parsedData = data ? JSON.parse(data) : defaultData;
+    console.log('getData() returning:', parsedData); // Debugging line
+    return parsedData;
 }
 
-function saveData(data) {
+async function saveData(data) {
     // Save locally immediately for a responsive UI
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
     // Sync to Supabase in the background
     if (supabaseClient) {
-        supabaseClient.from('site_data')
+        try {
+            const { error } = await supabaseClient.from('site_data')
             .upsert({ id: 'main', data: data })
-            .then(({ error }) => {
-                if (error) console.error('Supabase sync error:', error.message);
-            });
+            if (error) throw error;
+            console.log('Supabase: Data successfully synced to cloud.');
+        } catch (error) {
+            console.error('Supabase sync error:', error.message);
+        }
+    }
+}
+
+// ==================== MEDIA UPLOAD ====================
+
+async function uploadMedia(file, folder) {
+    if (!supabaseClient) {
+        console.error('Supabase client not initialized. Cannot upload file.');
+        return null;
+    }
+
+    const fileExtension = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExtension}`; // Unique filename
+    const filePath = `${folder}/${fileName}`;
+
+    try {
+        const { error: uploadError } = await supabaseClient.storage
+            .from('website-media') // Assuming a bucket named 'website-media'
+            .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabaseClient.storage.from('website-media').getPublicUrl(filePath);
+        return publicUrlData.publicUrl;
+
+    } catch (error) {
+        console.error('Error uploading file to Supabase Storage:', error.message);
+        return null;
     }
 }
 
@@ -150,16 +184,22 @@ function removeUpdate(id) {
 
 // ==================== GALLERY ====================
 
-function getGallery() {
+function getGallery() { // This will now return items from defaultData if Supabase is empty
     return getData().gallery;
 }
 
-function createGalleryItem(src, title, description) {
-    const data = getData();
+async function createGalleryItem(file, title, description) { // Now accepts a file
+    const imageUrl = await uploadMedia(file, 'gallery'); // Upload to 'gallery' folder
+    if (!imageUrl) {
+        console.error('Failed to upload gallery image. Item not created.');
+        return;
+    }
+
+    const data = getData(); // Get latest data after upload
 
     data.gallery.push({
         id: Date.now(),
-        src,
+        src: imageUrl, // Store the public URL
         title,
         description
     });
@@ -167,13 +207,19 @@ function createGalleryItem(src, title, description) {
     saveData(data);
 }
 
-function updateGalleryItem(id, src, title, description) {
+async function updateGalleryItem(id, file, title, description) { // Added file parameter
     const data = getData();
-
     const item = data.gallery.find(g => g.id === id);
 
     if (item) {
-        item.src = src;
+        if (file) { // If a new file is provided, upload it
+            const imageUrl = await uploadMedia(file, 'gallery');
+            if (imageUrl) {
+                item.src = imageUrl;
+            } else {
+                console.warn('Failed to upload new image for gallery item, keeping old image.');
+            }
+        }
         item.title = title;
         item.description = description;
     }
@@ -191,16 +237,22 @@ function removeGalleryItem(id) {
 
 // ==================== MEMORIES ====================
 
-function getMemories() {
+function getMemories() { // This will now return items from defaultData if Supabase is empty
     return getData().memories;
 }
 
-function createMemory(src, title, description, date) {
-    const data = getData();
+async function createMemory(file, title, description, date) { // Now accepts a file
+    const imageUrl = await uploadMedia(file, 'memories'); // Upload to 'memories' folder
+    if (!imageUrl) {
+        console.error('Failed to upload memory image. Item not created.');
+        return;
+    }
+
+    const data = getData(); // Get latest data after upload
 
     data.memories.push({
         id: Date.now(),
-        src,
+        src: imageUrl, // Store the public URL
         title,
         description,
         date
@@ -209,13 +261,19 @@ function createMemory(src, title, description, date) {
     saveData(data);
 }
 
-function updateMemory(id, src, title, description, date) {
+async function updateMemory(id, file, title, description, date) { // Added file parameter
     const data = getData();
-
     const item = data.memories.find(m => m.id === id);
 
     if (item) {
-        item.src = src;
+        if (file) { // If a new file is provided, upload it
+            const imageUrl = await uploadMedia(file, 'memories');
+            if (imageUrl) {
+                item.src = imageUrl;
+            } else {
+                console.warn('Failed to upload new image for memory item, keeping old image.');
+            }
+        }
         item.title = title;
         item.description = description;
         item.date = date;

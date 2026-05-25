@@ -55,8 +55,27 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 
 This creates:
 - `site_data` table
-- Default data
+- Default data (including initial gallery items)
 - Proper indexes
+
+### Step 5: Set Up Supabase Storage for Media Uploads
+
+To enable image uploads for your gallery and memories, you need to create a storage bucket and set its access policies.
+
+1.  In your Supabase project, go to **Storage** (bucket icon).
+2.  Click **New bucket**.
+3.  Name it `website-media` (this name is used in `data.js`).
+4.  Set **Public access** to `ON`. This allows anyone to view the uploaded images.
+5.  Click **Create bucket**.
+6.  **Important: Configure Row Level Security (RLS) for the bucket.**
+    *   Go to the `website-media` bucket settings.
+    *   Under "Policies", you'll need to add policies to allow authenticated users to upload files. For a simple admin panel, you might add a policy like:
+        *   **Name**: `Allow authenticated uploads`
+        *   **Target Operations**: `INSERT`
+        *   **Target Paths**: `.` (meaning all paths within the bucket)
+        *   **USING expression**: `(auth.role() = 'authenticated')`
+        *   **WITH CHECK expression**: `(auth.role() = 'authenticated')`
+    *   This ensures only logged-in users (e.g., your admin panel) can upload, but anyone can view.
 
 ### Step 5: Deploy
 

@@ -14,7 +14,10 @@ INSERT INTO site_data (id, data) VALUES ('main', '{
     "updates": [
         {"id": 1, "text": "🎉 Vishal Jagaran 2026 registrations now open!", "date": "2026-04-10", "active": true}
     ],
-    "gallery": [],
+    "gallery": [
+        {"id": 1, "src": "club photo.jpg", "title": "Our Club", "description": "Adarsh Yuva Mandal Head Office"},
+        {"id": 2, "src": "background image.jpg", "title": "Celebration", "description": "Annual Event"}
+    ],
     "memories": [],
     "thoughts": []
 }') ON CONFLICT (id) DO NOTHING;
