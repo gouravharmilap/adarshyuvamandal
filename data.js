@@ -1,4 +1,11 @@
 const STORAGE_KEY = 'aym_website_data';
+const SUPABASE_URL = 'https://dlkjoppjmojmudtkkipj.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_H7kA6cm39MKy1ObVqZbwnA_7ns59Bk1';
+
+let supabaseClient = null;
+if (typeof supabase !== 'undefined' && SUPABASE_URL !== 'https://dlkjoppjmojmudtkkipj.supabase.co' && SUPABASE_ANON_KEY !== 'sb_publishable_H7kA6cm39MKy1ObVqZbwnA_7ns59Bk1') {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
 const defaultData = {
     updates: [],
@@ -9,17 +16,50 @@ const defaultData = {
 };
 
 async function initializeData() {
-    if (!localStorage.getItem(STORAGE_KEY)) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+    // 1. Try to fetch from Supabase first
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('site_data')
+                .select('data')
+                .eq('id', 'main')
+                .single();
+
+            if (data && data.data) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data.data));
+                console.log('Successfully synced with Supabase cloud');
+                return;
+            }
+            if (error) console.warn('Supabase fetch notice:', error.message);
+        } catch (err) {
+            console.error('Supabase initialization failed:', err);
+        }
+    }
+
+    // 2. Fallback to localStorage or default data
+    const localData = localStorage.getItem(STORAGE_KEY);
+    if (!localData) {
+        saveData(defaultData);
     }
 }
 
 function getData() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : defaultData;
 }
 
 function saveData(data) {
+    // Save locally immediately for a responsive UI
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+    // Sync to Supabase in the background
+    if (supabaseClient) {
+        supabaseClient.from('site_data')
+            .upsert({ id: 'main', data: data })
+            .then(({ error }) => {
+                if (error) console.error('Supabase sync error:', error.message);
+            });
+    }
 }
 
 // PASSWORD
