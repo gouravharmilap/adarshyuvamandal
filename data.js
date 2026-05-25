@@ -122,6 +122,9 @@ async function uploadMedia(file, folder) {
         return null;
     }
 
+    // If input is already a URL string or no file was selected, return it as is
+    if (typeof file === 'string' || !file) return file;
+
     const fileExtension = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExtension}`; // Unique filename
     const filePath = `${folder}/${fileName}`;
@@ -150,7 +153,7 @@ function getAdminPassword() {
 async function setAdminPassword(password) {
     const data = getData();
     data.adminPassword = password;
-    saveData(data);
+    await saveData(data);
 }
 
 // ==================== UPDATES ====================
