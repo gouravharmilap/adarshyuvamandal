@@ -83,16 +83,6 @@ body::after {
 }
 
 @media (max-width: 768px) {
-    * {
-        max-width: 100vw;
-        overflow-x: hidden;
-    }
-
-    html, body {
-        max-width: 100vw;
-        overflow-x: hidden;
-    }
-
     /* Better background on mobile */
     body::before {
         background:
@@ -115,19 +105,13 @@ body::after {
         height: 200px;
     }
 
-    .hero {
-        max-width: 100vw;
+    html, body {
         overflow-x: hidden;
+        max-width: 100vw;
     }
 
-    .section {
+    .navbar, .hero, .section, footer {
         max-width: 100vw;
-        overflow-x: hidden;
-    }
-
-    footer {
-        max-width: 100vw;
-        overflow-x: hidden;
     }
 }
 
@@ -1393,14 +1377,8 @@ footer {
 }
 
 @media (max-width: 480px) {
-    * {
-        max-width: 100vw;
-        overflow-x: hidden;
-    }
-
     .hero {
         padding: 120px 15px 80px;
-        max-width: 100vw;
     }
 
     .hero h1 {
