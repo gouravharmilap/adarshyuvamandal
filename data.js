@@ -1,15 +1,22 @@
 const STORAGE_KEY = 'aym_website_data';
 const SUPABASE_URL = 'https://dlkjoppjmojmudtkkipj.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_H7kA6cm39MKy1ObVqZbwnA_7ns59Bk1';
+
+// FIX: You were using a Stripe key. Replace this with your actual Supabase 'anon public' key.
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
 
 let supabaseClient = null;
-if (typeof supabase !== 'undefined' && SUPABASE_URL !== 'https://dlkjoppjmojmudtkkipj.supabase.co' && SUPABASE_ANON_KEY !== 'sb_publishable_H7kA6cm39MKy1ObVqZbwnA_7ns59Bk1') {
+
+// Only initialize if the library is loaded and keys aren't the default placeholders
+if (typeof supabase !== 'undefined' && SUPABASE_URL.includes('supabase.co')) {
+    console.log('Supabase: Initializing client...');
     supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
 const defaultData = {
     updates: [],
-    gallery: [],
+    gallery: [
+        { id: 1, src: 'club photo.jpg', title: 'Our Club', description: 'Adarsh Yuva Mandal Head Office' }
+    ],
     memories: [],
     thoughts: [],
     adminPassword: 'aym2026admin'
@@ -22,17 +29,26 @@ async function initializeData() {
             const { data, error } = await supabaseClient
                 .from('site_data')
                 .select('data')
-                .eq('id', 'main')
-                .single();
+                .eq('id', 'main');
 
-            if (data && data.data) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data.data));
-                console.log('Successfully synced with Supabase cloud');
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                // Data found in cloud, sync it to local storage
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data[0].data));
+                console.log('Supabase: Data synced from cloud');
                 return;
             }
-            if (error) console.warn('Supabase fetch notice:', error.message);
+            
+            // If table is empty, upload what we currently have in local storage to the cloud
+            const localData = localStorage.getItem(STORAGE_KEY);
+            if (localData) {
+                console.log('Supabase: Cloud empty, pushing local data...');
+                saveData(JSON.parse(localData));
+            }
         } catch (err) {
-            console.error('Supabase initialization failed:', err);
+            console.error('Supabase Sync Failed:', err.message || err);
+            console.warn('Operating in offline mode (LocalStorage only). Verify your API Key.');
         }
     }
 
