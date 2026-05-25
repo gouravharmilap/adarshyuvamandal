@@ -23,15 +23,10 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    max-width: 100vw;
-    overflow-x: hidden;
 }
 
 html {
     scroll-behavior: smooth;
-    overflow-x: hidden;
-    max-width: 100vw;
-    overflow: hidden;
 }
 
 body {
@@ -40,9 +35,7 @@ body {
     color: var(--text-light);
     min-height: 100vh;
     overflow-x: hidden;
-    max-width: 100vw;
     width: 100%;
-    overflow-x: hidden;
 }
 
 /* Background Image with Overlay */
@@ -54,12 +47,11 @@ body::before {
     width: 100%;
     height: 100%;
     background:
-        linear-gradient(180deg, rgba(10, 10, 18, 0.7) 0%, rgba(10, 10, 18, 0.6) 50%, rgba(10, 10, 18, 0.7) 100%),
+        linear-gradient(180deg, rgba(10, 10, 18, 0.92) 0%, rgba(10, 10, 18, 0.85) 50%, rgba(10, 10, 18, 0.95) 100%),
         url('background image.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    background-repeat: no-repeat;
     pointer-events: none;
     z-index: -3;
 }
@@ -88,7 +80,6 @@ body::after {
     height: 100%;
     z-index: -1;
     overflow: hidden;
-    max-width: 100vw;
 }
 
 @media (max-width: 768px) {
@@ -223,8 +214,6 @@ body::after {
     align-items: center;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     background: transparent;
-    max-width: 100vw;
-    overflow-x: hidden;
 }
 
 .navbar.scrolled {
@@ -355,8 +344,7 @@ body::after {
     text-align: center;
     padding: 140px 20px 100px;
     position: relative;
-    overflow: hidden;
-    max-width: 100vw;
+    overflow: visible;
 }
 
 .hero::before {
@@ -574,8 +562,6 @@ body::after {
     padding: 110px 60px;
     max-width: 1400px;
     margin: 0 auto;
-    width: 100%;
-    overflow-x: hidden;
 }
 
 .section-header {
@@ -1066,8 +1052,6 @@ footer {
     border-top: 1px solid var(--glass-border);
     margin-top: 120px;
     background: rgba(10, 10, 18, 0.6);
-    max-width: 100vw;
-    overflow-x: hidden;
 }
 
 .footer-grid {
