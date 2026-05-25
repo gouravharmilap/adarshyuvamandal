@@ -15,7 +15,7 @@ if (typeof supabase !== 'undefined') {
     } else if (SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY_HERE') { // Check for the placeholder specifically
         console.error('Supabase Error: You are still using the placeholder ANON_KEY. Cloud sync will not work.');
     } else {
-        console.error('Supabase Error: You are still using the placeholder ANON_KEY. Cloud sync will not work.');
+        console.error('Supabase Error: The provided key is invalid. Cloud sync will not work.');
     }
 } else {
     console.error('Supabase Error: Library not found! Make sure <script src=".../supabase-js"></script> is in your HTML.');
@@ -46,16 +46,21 @@ async function initializeData() {
             if (data && data.data) { // 'data' here is the row object from maybeSingle
                 // Successfully got cloud data
                 const cloudData = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
-                
-                // Merge cloud data with local to ensure passwords etc exist, cloud data takes precedence
-                // Merge cloud data with local to ensure passwords etc exist
-                const mergedData = { ...defaultData, ...cloudData };
-                
+
+                // Deep merge logic: ensure all required keys exist
+                const mergedData = {
+                    ...defaultData,
+                    ...cloudData,
+                    updates: cloudData.updates || [],
+                    gallery: (cloudData.gallery && cloudData.gallery.length > 0) ? cloudData.gallery : defaultData.gallery,
+                    memories: cloudData.memories || [],
+                    thoughts: cloudData.thoughts || []
+                };
+
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedData));
                 console.log('Supabase: Data synced from cloud');
                 return;
             }
-            
             // If table is empty, upload what we currently have in local storage to the cloud
             const localData = localStorage.getItem(STORAGE_KEY);
             if (localData) {
@@ -78,9 +83,18 @@ async function initializeData() {
 
 function getData() {
     const data = localStorage.getItem(STORAGE_KEY);
-    const parsedData = data ? JSON.parse(data) : defaultData;
-    console.log('getData() returning:', parsedData); // Debugging line
-    return parsedData;
+    if (!data) return defaultData;
+
+    try {
+        const parsed = JSON.parse(data);
+        // Ensure arrays are initialized to prevent frontend errors
+        ['updates', 'gallery', 'memories', 'thoughts'].forEach(key => {
+            if (!parsed[key]) parsed[key] = [];
+        });
+        return parsed;
+    } catch (e) {
+        return defaultData;
+    }
 }
 
 async function saveData(data) {
@@ -149,20 +163,20 @@ function getAllUpdates() {
     return getData().updates;
 }
 
-function createUpdate(text) {
+async function createUpdate(text) {
     const data = getData();
 
     data.updates.unshift({
         id: Date.now(),
         text: text,
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toLocaleDateString('en-GB'),
         active: true
     });
 
-    saveData(data);
+    await saveData(data);
 }
 
-function toggleUpdateStatus(id) {
+async function toggleUpdateStatus(id) {
     const data = getData();
 
     const item = data.updates.find(u => u.id === id);
@@ -171,15 +185,15 @@ function toggleUpdateStatus(id) {
         item.active = !item.active;
     }
 
-    saveData(data);
+    await saveData(data);
 }
 
-function removeUpdate(id) {
+async function removeUpdate(id) {
     const data = getData();
 
     data.updates = data.updates.filter(u => u.id !== id);
 
-    saveData(data);
+    await saveData(data);
 }
 
 // ==================== GALLERY ====================
@@ -204,7 +218,7 @@ async function createGalleryItem(file, title, description) { // Now accepts a fi
         description
     });
 
-    saveData(data);
+    await saveData(data);
 }
 
 async function updateGalleryItem(id, file, title, description) { // Added file parameter
@@ -224,15 +238,15 @@ async function updateGalleryItem(id, file, title, description) { // Added file p
         item.description = description;
     }
 
-    saveData(data);
+    await saveData(data);
 }
 
-function removeGalleryItem(id) {
+async function removeGalleryItem(id) {
     const data = getData();
 
     data.gallery = data.gallery.filter(g => g.id !== id);
 
-    saveData(data);
+    await saveData(data);
 }
 
 // ==================== MEMORIES ====================
@@ -258,7 +272,7 @@ async function createMemory(file, title, description, date) { // Now accepts a f
         date
     });
 
-    saveData(data);
+    await saveData(data);
 }
 
 async function updateMemory(id, file, title, description, date) { // Added file parameter
@@ -279,15 +293,15 @@ async function updateMemory(id, file, title, description, date) { // Added file 
         item.date = date;
     }
 
-    saveData(data);
+    await saveData(data);
 }
 
-function removeMemory(id) {
+async function removeMemory(id) {
     const data = getData();
 
     data.memories = data.memories.filter(m => m.id !== id);
 
-    saveData(data);
+    await saveData(data);
 }
 
 // ==================== THOUGHTS ====================
@@ -296,22 +310,22 @@ function getThoughts() {
     return getData().thoughts;
 }
 
-function createThought(text) {
+async function createThought(text) {
     const data = getData();
 
     data.thoughts.unshift({
         id: Date.now(),
         text,
-        date: new Date().toLocaleDateString()
+        date: new Date().toLocaleDateString('en-GB')
     });
 
-    saveData(data);
+    await saveData(data);
 }
 
-function removeThought(id) {
+async function removeThought(id) {
     const data = getData();
 
     data.thoughts = data.thoughts.filter(t => t.id !== id);
 
-    saveData(data);
+    await saveData(data);
 }
